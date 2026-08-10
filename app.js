@@ -122,8 +122,17 @@ async function loadProducts() {
     state.products = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code && p.price > 0);
     buildBrandFilters(); render();
   } catch (error) {
-    el.error.hidden = false;
-    el.error.textContent = `دریافت فهرست محصولات انجام نشد. تنظیمات منبع داده را بررسی کنید. (${error.message})`;
+    try {
+      const fallbackResponse = await fetch(config.fallbackDataUrl || "products.sample.json", { cache: "no-store" });
+      if (!fallbackResponse.ok) throw error;
+      const fallbackRaw = await fallbackResponse.json();
+      state.products = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code && p.price > 0);
+      buildBrandFilters(); render();
+      el.error.hidden = true;
+    } catch (fallbackError) {
+      el.error.hidden = false;
+      el.error.textContent = `دریافت فهرست محصولات انجام نشد. تنظیمات منبع داده را بررسی کنید. (${error.message})`;
+    }
   } finally { el.loading.hidden = true; }
 }
 
@@ -275,4 +284,6 @@ bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1))
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
 
 buildCategories(); loadProducts(); loadDriveBanners();
+// همگام‌سازی خودکار فهرست محصولات هر ۲۴ ساعت، حتی وقتی صفحه باز بماند.
+setInterval(loadProducts, 24 * 60 * 60 * 1000);
 bannerState.refreshTimer = setInterval(loadDriveBanners, Number(window.XPOINT_CONFIG?.bannerRefreshMs) || 300000);
