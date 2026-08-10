@@ -1,0 +1,15 @@
+[
+  {"id":1,"name":"تلویزیون هوشمند ۵۵ اینچ سری 7","brand":"X.Vision","code":"55XYU775","price":"38990000","category":"تلویزیون","image":"","stock":"موجود"},
+  {"id":2,"name":"گوشی موبایل Galaxy A55 ظرفیت 256GB","brand":"Samsung","code":"SM-A556E","price":"28750000","category":"موبایل","image":"","stock":"موجود"},
+  {"id":3,"name":"لپ‌تاپ ۱۵.۶ اینچ IdeaPad Slim 3","brand":"Lenovo","code":"83ER00D3","price":"42100000","category":"لپ‌تاپ","image":"","stock":"موجود"},
+  {"id":4,"name":"کنسول بازی PlayStation 5 Slim","brand":"Sony","code":"CFI-2016A","price":"36500000","category":"کنسول بازی","image":"","stock":"موجود"},
+  {"id":5,"name":"اسپیکر قابل حمل PartyBox Club 120","brand":"JBL","code":"JBLPBCLUB120","price":"24800000","category":"اسپیکر","image":"","stock":"موجود"},
+  {"id":6,"name":"ماشین لباسشویی ۸ کیلویی سری Harmony","brand":"X.Vision","code":"TG82-AWBL","price":"31400000","category":"لوازم خانگی","image":"","stock":"موجود"},
+  {"id":7,"name":"تبلت Pad 6 ظرفیت 256GB","brand":"Xiaomi","code":"23043RP34G","price":"21900000","category":"تبلت","image":"","stock":"موجود"},
+  {"id":8,"name":"ساعت هوشمند Watch Fit 3","brand":"Huawei","code":"SLO-B09","price":"8450000","category":"گجت‌های خانگی","image":"","stock":"موجود"},
+  {"id":9,"name":"هدفون بی‌سیم WH-CH520","brand":"Sony","code":"WHCH520","price":"3980000","category":"اکسسوری","image":"","stock":"موجود"},
+  {"id":10,"name":"یخچال فریزر ساید بای ساید ۳۰ فوت","brand":"X.Vision","code":"TS666-AWD","price":"71900000","category":"لوازم خانگی","image":"","stock":"موجود"},
+  {"id":11,"name":"گوشی موبایل Redmi Note 14 Pro","brand":"Xiaomi","code":"24116RACCG","price":"26700000","category":"موبایل","image":"","stock":"موجود"},
+  {"id":12,"name":"لپ‌تاپ MacBook Air M3 ظرفیت 256GB","brand":"Apple","code":"MRXV3","price":"79900000","category":"لپ‌تاپ","image":""},
+  {"id":13,"name":"محصول آزمایشی بدون قیمت","brand":"X.Point","code":"HIDDEN-001","price":"","category":"اکسسوری","image":""}
+]

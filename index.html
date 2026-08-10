@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f26322" />
+  <meta name="description" content="کاتالوگ به‌روز محصولات X.Point با فیلتر دسته‌بندی و برند" />
+  <title>X.Point | انتخاب درست، ساده‌تر</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#products">رفتن به محصولات</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#" aria-label="صفحه اصلی X.Point">
+        <img src="assets/xpoint.svg" alt="X.Point" />
+      </a>
+      <nav aria-label="ناوبری اصلی">
+        <a href="#categories">دسته‌بندی‌ها</a>
+        <a href="#products">محصولات</a>
+        <a href="#guide">راهنمای خرید</a>
+      </nav>
+      <button class="support-link" type="button" data-scroll-products>مشاهده محصولات</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="drive-banner shell" id="driveBanner" aria-label="بنرهای ویژه X.Point" hidden>
+      <div class="drive-banner-track" id="driveBannerTrack"></div>
+      <div class="drive-banner-controls">
+        <button type="button" id="bannerPrev" aria-label="بنر قبلی">→</button>
+        <div class="drive-banner-dots" id="driveBannerDots" aria-label="انتخاب بنر"></div>
+        <button type="button" id="bannerNext" aria-label="بنر بعدی">←</button>
+      </div>
+    </section>
+
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> کاتالوگ هوشمند X.Point</p>
+        <h1 id="hero-title">انتخاب درست،<br /><em>ساده‌تر.</em></h1>
+        <p class="hero-lead">محصول، قیمت نقد و موجودی را شفاف ببینید؛ بین برندها مقایسه کنید و با خیال راحت انتخاب کنید.</p>
+        <div class="hero-actions">
+          <button class="primary-button" type="button" data-scroll-products>دیدن همه محصولات <span aria-hidden="true">←</span></button>
+        </div>
+      </div>
+
+      <div class="hero-stage" aria-hidden="true">
+        <div class="x-route"></div>
+        <div class="stage-label label-one"><span>مقایسه روشن</span><b>برند و قیمت</b></div>
+        <div class="product-orbit orbit-tv">
+          <span class="device tv-device"><i></i></span>
+          <b>تصویر واضح‌تر</b>
+          <small>تلویزیون</small>
+        </div>
+        <div class="product-orbit orbit-phone">
+          <span class="device phone-device"><i></i></span>
+          <b>همراه هوشمند</b>
+          <small>موبایل</small>
+        </div>
+        <div class="product-orbit orbit-laptop">
+          <span class="device laptop-device"><i></i></span>
+          <b>کار و زندگی</b>
+          <small>لپ‌تاپ</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="category-section shell" id="categories" aria-labelledby="category-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow"><span></span> مسیر سریع انتخاب</p>
+          <h2 id="category-title">دنبال چه چیزی هستید؟</h2>
+        </div>
+        <p>یک دسته را انتخاب کنید تا محصولات مرتبط نمایش داده شوند.</p>
+      </div>
+      <div class="category-rail" id="categoryRail" role="list"></div>
+    </section>
+
+    <section class="catalog shell" id="products" aria-labelledby="products-title">
+      <aside class="filters" aria-label="فیلتر محصولات">
+        <div class="filter-head">
+          <div>
+            <span class="filter-kicker">فیلتر دقیق</span>
+            <h2>برندها</h2>
+          </div>
+          <button id="clearFilters" type="button">پاک کردن</button>
+        </div>
+        <div id="brandFilters" class="brand-filters"></div>
+        <div class="value-card" id="guide">
+          <span class="value-mark">X.</span>
+          <p>ارزش خرید فقط قیمت نیست.</p>
+          <small>اصالت، گارانتی و پشتیبانی را هم در انتخاب خود بسنجید.</small>
+        </div>
+      </aside>
+
+      <div class="product-area">
+        <div class="catalog-toolbar">
+          <div>
+            <p class="eyebrow"><span></span> انتخاب‌های موجود</p>
+            <h2 id="products-title">محصولات <small id="resultCount"></small></h2>
+          </div>
+          <div class="toolbar-actions">
+            <label class="search-box">
+              <span class="sr-only">جستجو</span>
+              <input id="searchInput" type="search" placeholder="جستجوی نام، برند یا کد..." autocomplete="off" />
+              <span aria-hidden="true">⌕</span>
+            </label>
+            <label class="sort-box">
+              <span class="sr-only">مرتب‌سازی</span>
+              <select id="sortSelect">
+                <option value="featured">پیشنهاد X.Point</option>
+                <option value="price-asc">کمترین قیمت</option>
+                <option value="price-desc">بیشترین قیمت</option>
+                <option value="name">نام محصول</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div id="activeFilters" class="active-filters" aria-live="polite"></div>
+        <div id="loadingState" class="state-card" hidden>در حال دریافت آخرین فهرست محصولات…</div>
+        <div id="errorState" class="state-card state-error" hidden></div>
+        <div id="productGrid" class="product-grid"></div>
+        <div id="emptyState" class="empty-state" hidden>
+          <span>⌕</span>
+          <h3>محصولی با این مشخصات پیدا نشد</h3>
+          <p>فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</p>
+          <button type="button" id="emptyReset">نمایش همه محصولات</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <div class="footer-brand">
+        <img src="assets/xpoint.svg" alt="X.Point" />
+        <p>خرید مطمئن، شفاف و بدون پیچیدگی.</p>
+      </div>
+      <div class="footer-meta">
+        <span>با پشتوانه</span>
+        <img src="assets/madiran-white.png" alt="مادیران" />
+      </div>
+    </div>
+  </footer>
+
+  <template id="productTemplate">
+    <article class="product-card">
+      <div class="product-image-wrap">
+        <span class="stock-badge"></span>
+        <img class="product-image" alt="" loading="lazy" />
+        <button class="compare-button" type="button" aria-label="افزودن به مقایسه" title="افزودن به مقایسه">＋</button>
+      </div>
+      <div class="product-info">
+        <div class="product-meta"><span class="product-brand"></span><span class="product-code"></span></div>
+        <h3 class="product-name"></h3>
+        <div class="price-block">
+          <span>قیمت نقد</span>
+          <strong class="product-price"></strong>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
