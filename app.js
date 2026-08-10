@@ -12,7 +12,7 @@ const CATEGORIES = [
   { name: "شارژر", icon: "⌁" }
 ];
 
-const state = { products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
+const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
 const bannerState = { items: [], index: 0, rotationTimer: null, refreshTimer: null };
 const el = {
   rail: document.querySelector("#categoryRail"), brandFilters: document.querySelector("#brandFilters"),
@@ -119,14 +119,16 @@ async function loadProducts() {
       raw = await response.json();
     }
     // ردیف‌های بدون قیمت یا با قیمت صفر، به‌طور کامل از سایت حذف می‌شوند.
-    state.products = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code && p.price > 0);
+    state.catalog = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
+    state.products = state.catalog.filter(p => p.price > 0);
     buildBrandFilters(); render();
   } catch (error) {
     try {
       const fallbackResponse = await fetch(config.fallbackDataUrl || "products.sample.json", { cache: "no-store" });
       if (!fallbackResponse.ok) throw error;
       const fallbackRaw = await fallbackResponse.json();
-      state.products = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code && p.price > 0);
+      state.catalog = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
+      state.products = state.catalog.filter(p => p.price > 0);
       buildBrandFilters(); render();
       el.error.hidden = true;
     } catch (fallbackError) {
@@ -206,7 +208,7 @@ function buildCategories() {
 }
 
 function buildBrandFilters() {
-  const counts = state.products.reduce((map, product) => map.set(product.brand, (map.get(product.brand) || 0) + 1), new Map());
+  const counts = state.catalog.reduce((map, product) => map.set(product.brand, (map.get(product.brand) || 0) + 1), new Map());
   const brands = [...counts.keys()].sort((a,b) => a.localeCompare(b,"fa"));
   el.brandFilters.replaceChildren(...brands.map(brand => {
     const label = document.createElement("label"); label.className = "brand-option";
