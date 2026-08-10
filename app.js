@@ -284,6 +284,6 @@ bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1))
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
 
 buildCategories(); loadProducts(); loadDriveBanners();
-// همگام‌سازی خودکار فهرست محصولات هر ۲۴ ساعت، حتی وقتی صفحه باز بماند.
-setInterval(loadProducts, 24 * 60 * 60 * 1000);
+// همگام‌سازی خودکار فهرست محصولات هر ۴ ساعت، حتی وقتی صفحه باز بماند.
+setInterval(loadProducts, 4 * 60 * 60 * 1000);
 bannerState.refreshTimer = setInterval(loadDriveBanners, Number(window.XPOINT_CONFIG?.bannerRefreshMs) || 300000);
