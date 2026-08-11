@@ -256,8 +256,6 @@ function productCard(product) {
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);
   stock.textContent = isOut ? "ناموجود" : product.stock; stock.classList.toggle("out", isOut);
-  const compare = fragment.querySelector(".compare-button");
-  compare.addEventListener("click", () => { compare.classList.toggle("active"); compare.textContent = compare.classList.contains("active") ? "✓" : "＋"; compare.setAttribute("aria-label", compare.classList.contains("active") ? "حذف از مقایسه" : "افزودن به مقایسه"); });
   card.dataset.code = product.code; return fragment;
 }
 
