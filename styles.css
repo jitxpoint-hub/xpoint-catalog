@@ -93,7 +93,8 @@ nav a:hover { color: var(--orange); }
 .label-two { right: 0; bottom: 29%; }
 @keyframes float { 0%,100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 
-.category-section { padding-block: 70px 84px; border-top: 1px solid var(--line); }
+.category-section { padding-block: 18px 58px; border-top: 0; }
+.hero + .category-section { margin-top: -18px; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 28px; }
 .section-heading h2, .catalog-toolbar h2, .filter-head h2 { margin: 0; font-size: 30px; letter-spacing: -1.4px; }
 .section-heading > p { width: 340px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
