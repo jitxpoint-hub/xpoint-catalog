@@ -1,16 +1,20 @@
 const CATEGORIES = [
   { name: "همه", icon: "X." },
+  { name: "لوازم خانگی", icon: "🏠" },
+  { name: "یخچال", icon: "▣" },
+  { name: "ظرفشویی", icon: "◇" },
+  { name: "لباسشویی", icon: "◌" },
+  { name: "کالای دیجیتال", icon: "⌘" },
   { name: "موبایل", icon: "📱" },
   { name: "اکسسوری", icon: "🎧" },
   { name: "لپ تاپ", icon: "💻" },
-  { name: "گجت های خانگی", icon: "⚙️" },
+  { name: "گجت", icon: "⚙️" },
   { name: "تلویزیون", icon: "📺" },
   { name: "اسپیکر", icon: "🔊" },
-  { name: "لوازم خانگی", icon: "🏠" },
   { name: "تبلت", icon: "▯" },
   { name: "کنسول بازی", icon: "🎮" },
-  { name: "آرایشی / بهداشتی", icon: "💄" },
-  { name: "شارژر", icon: "⚡" }
+  { name: "شارژر", icon: "⚡" },
+  { name: "لوازم خانگی ریز", icon: "✦" }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
@@ -80,10 +84,10 @@ function canonicalCategory(value) {
     .replace(/[\u200c\s_-]+/g, "")
     .toLocaleLowerCase("fa");
   const aliases = {
-    "لوازمخانگی": "لوازم خانگی", "گجتهایخانگی": "گجت های خانگی",
+    "لوازمخانگی": "لوازم خانگی", "گجتهایخانگی": "گجت",
     "تلویزیون": "تلویزیون", "تلوزیون": "تلویزیون", "اسپیکر": "اسپیکر",
     "کنسولبازی": "کنسول بازی", "لپتاپ": "لپ تاپ", "تبلت": "تبلت",
-    "اکسسوری": "اکسسوری", "موبایل": "موبایل", "آرایشیبهداشتی": "آرایشی / بهداشتی",
+    "اکسسوری": "اکسسوری", "موبایل": "موبایل", "آرایشیبهداشتی": "لوازم خانگی ریز",
     "شارژر": "شارژر"
   };
   return aliases[compact] || normalize(value);
@@ -223,8 +227,12 @@ function buildBrandFilters() {
 
 function filteredProducts() {
   const query = state.search.toLocaleLowerCase("fa");
+  const groups = {
+    "لوازم خانگی": new Set(["لوازم خانگی", "یخچال", "ظرفشویی", "لباسشویی"]),
+    "کالای دیجیتال": new Set(["کالای دیجیتال", "موبایل", "لپ تاپ", "اکسسوری", "گجت", "گجت های خانگی", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"])
+  };
   const items = state.products.filter(product => {
-    const categoryOk = state.category === "همه" || product.category === state.category;
+    const categoryOk = state.category === "همه" || (groups[state.category] ? groups[state.category].has(product.category) : product.category === state.category);
     const brandOk = !state.brands.size || state.brands.has(product.brand);
     const haystack = `${product.name} ${product.brand} ${product.code}`.toLocaleLowerCase("fa");
     return categoryOk && brandOk && (!query || haystack.includes(query));
