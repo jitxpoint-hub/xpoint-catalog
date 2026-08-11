@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "XPointFa";
+  src: url("assets/fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
   --orange: #f26322;
   --orange-dark: #d94f0d;
@@ -21,7 +29,8 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--field);
-  font-family: Dana, "IRANYekanX", "Iran Yekan", Tahoma, Arial, sans-serif;
+  font-family: "XPointFa", Tahoma, Arial, sans-serif;
+  font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
 button, input, select { font: inherit; }
