@@ -1,9 +1,9 @@
 const CATEGORY_GROUPS = [
-  { name: "همه", icon: "X.", children: [] },
-  { name: "لوازم خانگی", icon: "🏠", children: ["یخچال", "ظرفشویی", "لباسشویی"] },
-  { name: "کالای دیجیتال", icon: "⌘", children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
-  { name: "تلویزیون", icon: "📺", children: [] },
-  { name: "لوازم خانگی ریز", icon: "✦", children: [] }
+  { name: "همه", icon: "X.", description: "تمام محصولات موجود کاتالوگ", imageCategories: [], children: [] },
+  { name: "لوازم خانگی", icon: "🏠", description: "یخچال، لباسشویی و ظرفشویی", imageCategories: ["یخچال", "لباسشویی", "ظرفشویی", "لوازم خانگی"], children: ["یخچال", "ظرفشویی", "لباسشویی"] },
+  { name: "کالای دیجیتال", icon: "⌘", description: "موبایل، لپ‌تاپ، گجت و اکسسوری", imageCategories: ["لپ تاپ", "موبایل", "کنسول بازی", "تبلت", "کالای دیجیتال"], children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
+  { name: "تلویزیون", icon: "📺", description: "انواع تلویزیون از برندهای معتبر", imageCategories: ["تلویزیون"], children: [] },
+  { name: "لوازم خانگی ریز", icon: "✦", description: "وسایل کوچک و کاربردی برای خانه", imageCategories: ["لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
@@ -116,7 +116,7 @@ async function loadProducts() {
     // ردیف‌های بدون قیمت یا با قیمت صفر، به‌طور کامل از سایت حذف می‌شوند.
     state.catalog = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
     state.products = state.catalog.filter(p => p.price > 0);
-    buildBrandFilters(); render();
+    buildCategories(); buildBrandFilters(); render();
   } catch (error) {
     try {
       const fallbackResponse = await fetch(config.fallbackDataUrl || "products.sample.json", { cache: "no-store" });
@@ -124,7 +124,7 @@ async function loadProducts() {
       const fallbackRaw = await fallbackResponse.json();
       state.catalog = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
       state.products = state.catalog.filter(p => p.price > 0);
-      buildBrandFilters(); render();
+      buildCategories(); buildBrandFilters(); render();
       el.error.hidden = true;
     } catch (fallbackError) {
       el.error.hidden = false;
@@ -193,14 +193,30 @@ function showBanner(index) {
 }
 
 function buildCategories() {
-  el.rail.replaceChildren(...CATEGORY_GROUPS.map(category => {
+  el.rail.replaceChildren(...CATEGORY_GROUPS.map((category, index) => {
     const button = document.createElement("button");
     button.type = "button"; button.className = "category-card"; button.dataset.category = category.name; button.setAttribute("role", "listitem");
-    button.innerHTML = `<span class="category-icon" aria-hidden="true">${category.icon}</span><strong>${category.name}</strong>`;
+    const visual = document.createElement("span"), image = document.createElement("img"), shade = document.createElement("span");
+    const content = document.createElement("span"), number = document.createElement("span"), title = document.createElement("strong"), description = document.createElement("small"), action = document.createElement("span");
+    visual.className = "category-visual"; shade.className = "category-shade"; content.className = "category-content"; number.className = "category-number"; action.className = "category-action";
+    const representative = categoryRepresentativeImage(category);
+    image.src = representative; image.alt = ""; image.loading = "lazy"; image.addEventListener("error", () => { image.src = placeholder({ category: category.name }); }, { once: true });
+    number.textContent = faNumber.format(index + 1).padStart(2, "۰"); title.textContent = category.name; description.textContent = category.description; action.innerHTML = `<span>${category.children.length ? "مشاهده زیرمجموعه‌ها" : "مشاهده محصولات"}</span><b aria-hidden="true">←</b>`;
+    visual.append(image, shade); content.append(number, title, description, action); button.append(visual, content);
     button.addEventListener("click", () => { state.category = category.name; renderSubcategories(category); render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
     return button;
   }));
-  renderSubcategories(CATEGORY_GROUPS[0]);
+  const selectedGroup = CATEGORY_GROUPS.find(group => group.name === state.category || group.children.includes(state.category)) || CATEGORY_GROUPS[0];
+  renderSubcategories(selectedGroup);
+}
+
+function categoryRepresentativeImage(category) {
+  const preferences = category.imageCategories || [];
+  for (const preferredCategory of preferences) {
+    const product = state.catalog.find(item => item.category === preferredCategory && item.image);
+    if (product) return product.image;
+  }
+  return state.catalog.find(item => item.image)?.image || placeholder({ category: category.name });
 }
 
 function renderSubcategories(group) {
