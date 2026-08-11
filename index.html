@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f26322" />
   <meta name="description" content="کاتالوگ به‌روز محصولات X.Point با فیلتر دسته‌بندی و برند" />
   <title>X.Point | انتخاب درست، ساده‌تر</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260811-2" />
 </head>
 <body>
   <a class="skip-link" href="#products">رفتن به محصولات</a>
@@ -62,16 +62,18 @@
     <section class="catalog shell" id="products" aria-labelledby="products-title">
       <aside class="filters" aria-label="فیلتر محصولات">
         <div class="filter-head">
-          <button class="brand-filter-toggle" id="brandFilterToggle" type="button" aria-expanded="false" aria-controls="brandFilters">
-            <span class="brand-filter-title">
-              <span class="filter-kicker">فیلتر دقیق</span>
-              <span class="brand-filter-name">برندها</span>
-            </span>
-            <span class="filter-chevron" aria-hidden="true">⌄</span>
-          </button>
+          <details class="brand-filter-details">
+            <summary class="brand-filter-toggle">
+              <span class="brand-filter-title">
+                <span class="filter-kicker">فیلتر دقیق</span>
+                <span class="brand-filter-name">برندها</span>
+              </span>
+              <span class="filter-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div id="brandFilters" class="brand-filters"></div>
+          </details>
           <button class="clear-filters" id="clearFilters" type="button">پاک کردن</button>
         </div>
-        <div id="brandFilters" class="brand-filters" hidden></div>
         <div class="value-card" id="guide">
           <span class="value-mark">X.</span>
           <p>ارزش خرید فقط قیمت نیست.</p>
@@ -165,6 +167,6 @@
   </dialog>
 
   <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20260811-2"></script>
 </body>
 </html>

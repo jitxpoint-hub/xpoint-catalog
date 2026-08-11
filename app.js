@@ -12,7 +12,7 @@ const el = {
   rail: document.querySelector("#categoryRail"), subrail: document.querySelector("#subcategoryRail"), brandFilters: document.querySelector("#brandFilters"),
   grid: document.querySelector("#productGrid"), template: document.querySelector("#productTemplate"),
   count: document.querySelector("#resultCount"), search: document.querySelector("#searchInput"),
-  sort: document.querySelector("#sortSelect"), clear: document.querySelector("#clearFilters"), brandToggle: document.querySelector("#brandFilterToggle"),
+  sort: document.querySelector("#sortSelect"), clear: document.querySelector("#clearFilters"),
   active: document.querySelector("#activeFilters"), loading: document.querySelector("#loadingState"),
   error: document.querySelector("#errorState"), empty: document.querySelector("#emptyState"),
   emptyReset: document.querySelector("#emptyReset")
@@ -311,11 +311,6 @@ let searchTimer;
 el.search.addEventListener("input", event => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { state.search = normalize(event.target.value); render(); }, 180); });
 el.sort.addEventListener("change", event => { state.sort = event.target.value; render(); });
 el.clear.addEventListener("click", resetAll); el.emptyReset.addEventListener("click", resetAll);
-el.brandToggle.addEventListener("click", () => {
-  const isOpen = el.brandToggle.getAttribute("aria-expanded") === "true";
-  el.brandToggle.setAttribute("aria-expanded", String(!isOpen));
-  el.brandFilters.hidden = isOpen;
-});
 document.querySelectorAll("[data-scroll-products]").forEach(button => button.addEventListener("click", () => document.querySelector("#products").scrollIntoView({ behavior: "smooth" })));
 bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1));
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
