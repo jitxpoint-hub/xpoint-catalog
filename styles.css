@@ -257,7 +257,7 @@ footer { color: #fff; background: var(--deep); }
   .brand img { height: 44px; }
   .support-link { padding: 10px 13px; }
   .drive-banner { margin-top: 14px; border-radius: 18px; }
-  .drive-banner-track { aspect-ratio: 16 / 7; min-height: 0; }
+  .drive-banner-track { aspect-ratio: 3 / 1; min-height: 0; }
   .drive-banner-slide::after { border-radius: 18px; }
   .hero { min-height: auto; grid-template-columns: 1fr; padding-top: 44px; }
   .hero h1 { font-size: clamp(56px, 18vw, 90px); letter-spacing: -4px; }
@@ -268,7 +268,7 @@ footer { color: #fff; background: var(--deep); }
   .value-card { display: none; }
 }
 @media (max-width: 580px) {
-  .drive-banner-track { aspect-ratio: 5 / 3; }
+  .drive-banner-track { aspect-ratio: 3 / 1; }
   .drive-banner-controls { right: 12px; bottom: 10px; transform: scale(.88); transform-origin: right bottom; }
   .hero { padding-bottom: 48px; }
   .hero-combined { margin-top: 18px; margin-bottom: 30px; padding: 9px; border-radius: 22px; }
