@@ -3,7 +3,7 @@ const CATEGORY_GROUPS = [
   { name: "لوازم خانگی", icon: "🏠", description: "یخچال، لباسشویی و ظرفشویی", image: "assets/category-home.jpg", imageCategories: ["یخچال", "لباسشویی", "ظرفشویی", "لوازم خانگی"], children: ["یخچال", "ظرفشویی", "لباسشویی"] },
   { name: "کالای دیجیتال", icon: "⌘", description: "موبایل، لپ‌تاپ، گجت و اکسسوری", image: "assets/category-digital.jpg", imageCategories: ["لپ تاپ", "موبایل", "کنسول بازی", "تبلت", "کالای دیجیتال"], children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
   { name: "تلویزیون", icon: "📺", description: "انواع تلویزیون از برندهای معتبر", image: "assets/category-tv.jpg", imageCategories: ["تلویزیون"], children: [] },
-  { name: "لوازم خانگی ریز", icon: "✦", description: "وسایل کوچک و کاربردی برای خانه", image: "assets/category-small-home.jpg", imageCategories: ["لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
+  { name: "گجت خانگی", icon: "✦", description: "گجت‌ها و ابزارهای هوشمند و کاربردی خانه", image: "assets/category-small-home.jpg", imageCategories: ["گجت خانگی", "لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
@@ -251,7 +251,8 @@ function filteredProducts() {
   const query = state.search.toLocaleLowerCase("fa");
   const groups = {
     "لوازم خانگی": new Set(["لوازم خانگی", "یخچال", "ظرفشویی", "لباسشویی"]),
-    "کالای دیجیتال": new Set(["کالای دیجیتال", "موبایل", "لپ تاپ", "اکسسوری", "گجت", "گجت های خانگی", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"])
+    "کالای دیجیتال": new Set(["کالای دیجیتال", "موبایل", "لپ تاپ", "اکسسوری", "گجت", "گجت های خانگی", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"]),
+    "گجت خانگی": new Set(["گجت خانگی", "لوازم خانگی ریز", "گجت", "گجت های خانگی"])
   };
   const items = state.products.filter(product => {
     const categoryOk = state.category === "همه" || (groups[state.category] ? groups[state.category].has(product.category) : product.category === state.category);
