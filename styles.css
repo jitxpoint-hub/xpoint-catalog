@@ -87,7 +87,7 @@ nav a:hover { color: var(--orange); }
   overflow: visible;
 }
 .hero-combined .hero-copy { max-width: 430px; margin: 0; text-align: right; }
-.hero-combined .hero h1 { font-size: clamp(54px, 5.7vw, 88px); }
+.hero-combined .hero h1 { font-size: clamp(44px, 4.6vw, 70px); letter-spacing: -3.5px; }
 .hero-combined .category-section {
   grid-area: categories;
   direction: rtl;
@@ -273,7 +273,7 @@ footer { color: #fff; background: var(--deep); }
   .hero { padding-bottom: 48px; }
   .hero-combined { margin-top: 18px; margin-bottom: 30px; padding: 9px; border-radius: 22px; }
   .hero-combined .hero { padding: 28px 18px 26px; }
-  .hero-combined .hero h1 { font-size: clamp(49px, 16vw, 68px); letter-spacing: -3px; }
+  .hero-combined .hero h1 { font-size: clamp(40px, 13vw, 56px); letter-spacing: -2.5px; }
   .hero-combined .category-section { padding: 21px 14px 18px; border-radius: 17px; }
   .hero-combined .section-heading { margin-bottom: 16px; }
   .hero-combined .section-heading h2 { font-size: 24px; }
