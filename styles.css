@@ -103,6 +103,9 @@ nav a:hover { color: var(--orange); }
 .category-card.active { color: var(--orange-dark); background: var(--soft-orange); border-color: rgba(242,99,34,.27); }
 .category-icon { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 10px; color: currentColor; background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.8); border-radius: 15px; font-size: 24px; line-height: 1; font-weight: 900; box-shadow: 0 7px 16px rgba(16,17,19,.06); }
 .category-card strong { display: block; overflow: hidden; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.subcategory-rail { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; padding: 10px 2px 2px; }
+.subcategory-chip { padding: 9px 15px; color: var(--body); background: #fff; border: 1px solid #dfe2e4; border-radius: 999px; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; transition: .2s ease; }
+.subcategory-chip:hover, .subcategory-chip.active { color: var(--orange-dark); background: var(--soft-orange); border-color: rgba(242,99,34,.28); }
 
 .catalog { display: grid; grid-template-columns: 248px minmax(0,1fr); gap: 32px; align-items: start; padding-bottom: 100px; }
 .filters { position: sticky; top: 110px; padding: 22px; background: var(--card); border-radius: var(--radius-lg); box-shadow: 0 10px 34px rgba(15,18,20,.05); }

@@ -1,26 +1,15 @@
-const CATEGORIES = [
-  { name: "همه", icon: "X." },
-  { name: "لوازم خانگی", icon: "🏠" },
-  { name: "یخچال", icon: "▣" },
-  { name: "ظرفشویی", icon: "◇" },
-  { name: "لباسشویی", icon: "◌" },
-  { name: "کالای دیجیتال", icon: "⌘" },
-  { name: "موبایل", icon: "📱" },
-  { name: "اکسسوری", icon: "🎧" },
-  { name: "لپ تاپ", icon: "💻" },
-  { name: "گجت", icon: "⚙️" },
-  { name: "تلویزیون", icon: "📺" },
-  { name: "اسپیکر", icon: "🔊" },
-  { name: "تبلت", icon: "▯" },
-  { name: "کنسول بازی", icon: "🎮" },
-  { name: "شارژر", icon: "⚡" },
-  { name: "لوازم خانگی ریز", icon: "✦" }
+const CATEGORY_GROUPS = [
+  { name: "همه", icon: "X.", children: [] },
+  { name: "لوازم خانگی", icon: "🏠", children: ["یخچال", "ظرفشویی", "لباسشویی"] },
+  { name: "کالای دیجیتال", icon: "⌘", children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
+  { name: "تلویزیون", icon: "📺", children: [] },
+  { name: "لوازم خانگی ریز", icon: "✦", children: [] }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
 const bannerState = { items: [], index: 0, rotationTimer: null, refreshTimer: null };
 const el = {
-  rail: document.querySelector("#categoryRail"), brandFilters: document.querySelector("#brandFilters"),
+  rail: document.querySelector("#categoryRail"), subrail: document.querySelector("#subcategoryRail"), brandFilters: document.querySelector("#brandFilters"),
   grid: document.querySelector("#productGrid"), template: document.querySelector("#productTemplate"),
   count: document.querySelector("#resultCount"), search: document.querySelector("#searchInput"),
   sort: document.querySelector("#sortSelect"), clear: document.querySelector("#clearFilters"),
@@ -204,13 +193,25 @@ function showBanner(index) {
 }
 
 function buildCategories() {
-  el.rail.replaceChildren(...CATEGORIES.map(category => {
+  el.rail.replaceChildren(...CATEGORY_GROUPS.map(category => {
     const button = document.createElement("button");
     button.type = "button"; button.className = "category-card"; button.dataset.category = category.name; button.setAttribute("role", "listitem");
     button.innerHTML = `<span class="category-icon" aria-hidden="true">${category.icon}</span><strong>${category.name}</strong>`;
-    button.addEventListener("click", () => { state.category = category.name; render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    button.addEventListener("click", () => { state.category = category.name; renderSubcategories(category); render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
     return button;
   }));
+  renderSubcategories(CATEGORY_GROUPS[0]);
+}
+
+function renderSubcategories(group) {
+  if (!el.subrail) return;
+  el.subrail.replaceChildren(...(group.children || []).map(name => {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "subcategory-chip"; button.textContent = name; button.dataset.category = name;
+    button.addEventListener("click", () => { state.category = name; render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    return button;
+  }));
+  el.subrail.hidden = !(group.children && group.children.length);
 }
 
 function buildBrandFilters() {
@@ -246,7 +247,8 @@ function filteredProducts() {
 }
 
 function render() {
-  document.querySelectorAll(".category-card").forEach(button => button.classList.toggle("active", button.dataset.category === state.category));
+  document.querySelectorAll(".category-card").forEach(button => { const group = CATEGORY_GROUPS.find(item => item.name === button.dataset.category); button.classList.toggle("active", button.dataset.category === state.category || Boolean(group?.children?.includes(state.category))); });
+  document.querySelectorAll(".subcategory-chip").forEach(button => button.classList.toggle("active", button.dataset.category === state.category));
   document.querySelectorAll(".brand-option input").forEach(input => input.checked = state.brands.has(input.value));
   const products = filteredProducts();
   el.count.textContent = `${faNumber.format(products.length)} کالا`;
