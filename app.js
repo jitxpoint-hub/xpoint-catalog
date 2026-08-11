@@ -4,6 +4,7 @@ const CATEGORIES = [
   { name: "اکسسوری", icon: "+" },
   { name: "لپ تاپ", icon: "▱" },
   { name: "گجت های خانگی", icon: "◇" },
+  { name: "تلویزیون", icon: "▣" },
   { name: "اسپیکر", icon: "◉" },
   { name: "لوازم خانگی", icon: "⌂" },
   { name: "تبلت", icon: "▯" },
