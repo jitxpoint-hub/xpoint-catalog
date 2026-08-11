@@ -67,6 +67,7 @@ nav a:hover { color: var(--orange); }
   grid-template-areas: "categories intro";
   gap: 34px;
   align-items: stretch;
+  direction: ltr;
   margin-top: 28px;
   margin-bottom: 42px;
   padding: 18px;
@@ -78,6 +79,7 @@ nav a:hover { color: var(--orange); }
 }
 .hero-combined .hero {
   grid-area: intro;
+  direction: rtl;
   display: flex;
   min-height: 430px;
   align-items: center;
@@ -88,6 +90,7 @@ nav a:hover { color: var(--orange); }
 .hero-combined .hero h1 { font-size: clamp(54px, 5.7vw, 88px); }
 .hero-combined .category-section {
   grid-area: categories;
+  direction: rtl;
   min-width: 0;
   padding: 30px;
   background: #f4f5f6;
