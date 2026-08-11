@@ -256,8 +256,27 @@ function productCard(product) {
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);
   stock.textContent = isOut ? "ناموجود" : product.stock; stock.classList.toggle("out", isOut);
+  card.addEventListener("click", () => openProductModal(product));
   card.dataset.code = product.code; return fragment;
 }
+
+function openProductModal(product) {
+  const modal = document.querySelector("#productModal");
+  const image = document.querySelector("#modalProductImage");
+  image.src = product.image || placeholder(product); image.alt = `تصویر ${product.name}`;
+  image.onerror = () => { image.src = placeholder(product); };
+  document.querySelector("#modalProductCategory").textContent = product.category || "X.Point";
+  document.querySelector("#modalProductName").textContent = product.name;
+  document.querySelector("#modalProductDescription").textContent = `محصول ${product.brand} در دسته ${product.category || "محصولات دیجیتال"}. برای دریافت مشخصات کامل و جزئیات فنی، اطلاعات ثبت‌شده در شیت را بررسی کنید.`;
+  document.querySelector("#modalProductBrand").textContent = product.brand;
+  document.querySelector("#modalProductCode").textContent = product.code;
+  document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
+  document.querySelector("#modalProductPrice").innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : "تماس بگیرید";
+  modal.showModal();
+}
+
+document.querySelector("#modalClose").addEventListener("click", () => document.querySelector("#productModal").close());
+document.querySelector("#productModal").addEventListener("click", event => { if (event.target.id === "productModal") event.target.close(); });
 
 function renderActiveFilters() {
   const chips = [];

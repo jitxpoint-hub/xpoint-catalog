@@ -153,6 +153,25 @@ nav a:hover { color: var(--orange); }
 .price-block > span { color: var(--muted); font-size: 9px; }
 .product-price { font-size: 15px; letter-spacing: -.4px; }
 .product-price small { margin-right: 4px; color: var(--muted); font-size: 8px; font-weight: 700; }
+.product-card { cursor: pointer; }
+.product-modal { width: min(860px, calc(100% - 28px)); max-width: 860px; padding: 0; overflow: hidden; color: var(--ink); background: var(--card); border: 0; border-radius: 26px; box-shadow: 0 28px 90px rgba(16,17,19,.28); }
+.product-modal::backdrop { background: rgba(16,17,19,.48); backdrop-filter: blur(5px); }
+.product-modal[open] { display: grid; grid-template-columns: .95fr 1.05fr; direction: ltr; }
+.modal-media { min-height: 420px; display: grid; place-items: center; background: #f3f4f4; }
+.modal-media img { width: 100%; height: 100%; max-height: 520px; object-fit: contain; padding: 38px; }
+.modal-copy { position: relative; direction: rtl; padding: 44px 38px 34px; }
+.modal-close { position: absolute; z-index: 2; top: 14px; left: 14px; width: 34px; height: 34px; border: 0; color: var(--ink); background: rgba(255,255,255,.82); border-radius: 50%; font-size: 24px; line-height: 1; cursor: pointer; }
+.modal-category { color: var(--orange); font-size: 11px; font-weight: 900; }
+.modal-copy h2 { margin: 12px 0 14px; font-size: clamp(22px, 3vw, 34px); line-height: 1.35; }
+.modal-description { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 2; }
+.modal-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 26px; }
+.modal-details div { padding: 12px; background: #f5f6f6; border-radius: 12px; }
+.modal-details dt { color: var(--muted); font-size: 10px; }
+.modal-details dd { margin: 7px 0 0; font-size: 12px; font-weight: 900; }
+.modal-price { display: flex; align-items: end; justify-content: space-between; padding-top: 18px; border-top: 1px solid #eceef0; }
+.modal-price span { color: var(--muted); font-size: 11px; }
+.modal-price strong { font-size: 25px; }
+@media (max-width: 650px) { .product-modal[open] { display: block; } .modal-media { min-height: 280px; } .modal-copy { padding: 30px 22px 24px; } .modal-details { grid-template-columns: 1fr 1fr; } }
 .state-card, .empty-state { padding: 40px; background: #fff; border-radius: 20px; color: var(--muted); text-align: center; }
 .state-error { color: #a03c2d; background: #fff2ef; }
 .empty-state span { display: block; color: var(--orange); font-size: 38px; }

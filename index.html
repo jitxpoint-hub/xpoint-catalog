@@ -162,6 +162,22 @@
     </article>
   </template>
 
+  <dialog class="product-modal" id="productModal" aria-labelledby="modalProductName">
+    <button class="modal-close" id="modalClose" type="button" aria-label="بستن">×</button>
+    <div class="modal-media"><img id="modalProductImage" alt="" /></div>
+    <div class="modal-copy">
+      <span class="modal-category" id="modalProductCategory"></span>
+      <h2 id="modalProductName"></h2>
+      <p class="modal-description" id="modalProductDescription"></p>
+      <dl class="modal-details">
+        <div><dt>برند</dt><dd id="modalProductBrand"></dd></div>
+        <div><dt>کد محصول</dt><dd id="modalProductCode"></dd></div>
+        <div><dt>وضعیت</dt><dd id="modalProductStock"></dd></div>
+      </dl>
+      <div class="modal-price"><span>قیمت نقد</span><strong id="modalProductPrice"></strong></div>
+    </div>
+  </dialog>
+
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
