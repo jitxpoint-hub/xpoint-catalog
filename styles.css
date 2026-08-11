@@ -56,7 +56,7 @@ nav a:hover { color: var(--orange); }
 .drive-banner-dot { width: 7px; height: 7px; padding: 0; border: 0; background: rgba(255,255,255,.48); border-radius: 999px; transition: width .2s ease, background .2s ease; }
 .drive-banner-dot.active { width: 22px; background: var(--orange); }
 
-.hero { min-height: 600px; display: grid; grid-template-columns: .85fr 1.15fr; gap: 44px; align-items: center; padding-block: 60px 72px; overflow: hidden; }
+.hero { min-height: 560px; display: grid; grid-template-columns: .85fr 1.15fr; gap: 44px; align-items: center; padding-block: 60px 18px; overflow: hidden; }
 .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: -.1px; }
 .eyebrow span { width: 26px; height: 3px; background: var(--orange); border-radius: 10px; }
 .hero h1 { margin: 0; font-size: clamp(58px, 7.1vw, 108px); line-height: .95; letter-spacing: -5px; font-weight: 950; }
@@ -93,8 +93,8 @@ nav a:hover { color: var(--orange); }
 .label-two { right: 0; bottom: 29%; }
 @keyframes float { 0%,100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 
-.category-section { padding-block: 18px 58px; border-top: 0; }
-.hero + .category-section { margin-top: -18px; }
+.category-section { padding-block: 0 58px; border-top: 0; }
+.hero + .category-section { margin-top: 0; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 28px; }
 .section-heading h2, .catalog-toolbar h2, .filter-head h2 { margin: 0; font-size: 30px; letter-spacing: -1.4px; }
 .section-heading > p { width: 340px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
