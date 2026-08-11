@@ -203,7 +203,12 @@ function buildCategories() {
     image.src = representative; image.alt = ""; image.loading = "lazy"; image.addEventListener("error", () => { image.src = placeholder({ category: category.name }); }, { once: true });
     number.textContent = faNumber.format(index + 1).padStart(2, "۰"); title.textContent = category.name; description.textContent = category.description; action.innerHTML = `<span>${category.children.length ? "مشاهده زیرمجموعه‌ها" : "مشاهده محصولات"}</span><b aria-hidden="true">←</b>`;
     visual.append(image, shade); content.append(number, title, description, action); button.append(visual, content);
-    button.addEventListener("click", () => { state.category = category.name; renderSubcategories(category); render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    if (category.children.length) button.setAttribute("aria-controls", "subcategoryRail");
+    button.addEventListener("click", () => {
+      state.category = category.name; renderSubcategories(category); render();
+      const target = category.children.length ? el.subrail : document.querySelector("#products");
+      requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: category.children.length ? "nearest" : "start" }));
+    });
     return button;
   }));
   const selectedGroup = CATEGORY_GROUPS.find(group => group.name === state.category || group.children.includes(state.category)) || CATEGORY_GROUPS[0];
@@ -263,7 +268,7 @@ function filteredProducts() {
 }
 
 function render() {
-  document.querySelectorAll(".category-card").forEach(button => { const group = CATEGORY_GROUPS.find(item => item.name === button.dataset.category); button.classList.toggle("active", button.dataset.category === state.category || Boolean(group?.children?.includes(state.category))); });
+  document.querySelectorAll(".category-card").forEach(button => { const group = CATEGORY_GROUPS.find(item => item.name === button.dataset.category); const isActive = button.dataset.category === state.category || Boolean(group?.children?.includes(state.category)); button.classList.toggle("active", isActive); if (group?.children?.length) button.setAttribute("aria-expanded", String(isActive)); });
   document.querySelectorAll(".subcategory-chip").forEach(button => button.classList.toggle("active", button.dataset.category === state.category));
   document.querySelectorAll(".brand-option input").forEach(input => input.checked = state.brands.has(input.value));
   const products = filteredProducts();

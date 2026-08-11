@@ -157,8 +157,10 @@ nav a:hover { color: var(--orange); }
 .category-action b { display: grid; place-items: center; width: 24px; height: 24px; color: #fff; background: var(--orange); border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; }
 .category-card.active .category-action { color: var(--orange-dark); }
 .subcategory-rail { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; padding: 14px 0 0; border-top: 1px solid rgba(16,17,19,.07); }
+.subcategory-rail:not([hidden]) { animation: subcategory-reveal .24s ease both; }
 .subcategory-chip { padding: 9px 15px; color: var(--body); background: #fff; border: 1px solid #dfe2e4; border-radius: 999px; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; transition: .2s ease; }
 .subcategory-chip:hover, .subcategory-chip.active { color: var(--orange-dark); background: var(--soft-orange); border-color: rgba(242,99,34,.28); }
+@keyframes subcategory-reveal { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: translateY(0); } }
 
 .catalog { display: grid; grid-template-columns: 248px minmax(0,1fr); gap: 32px; align-items: start; padding-bottom: 100px; }
 .filters { position: sticky; top: 110px; padding: 22px; background: var(--card); border-radius: var(--radius-lg); box-shadow: 0 10px 34px rgba(15,18,20,.05); }
