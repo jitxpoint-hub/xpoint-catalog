@@ -101,7 +101,7 @@ nav a:hover { color: var(--orange); }
 .category-card { min-width: 0; padding: 16px 9px 14px; border: 1px solid transparent; color: var(--body); background: #e6e8ea; border-radius: var(--radius); text-align: center; transition: transform .2s ease, background .2s ease, border .2s ease, color .2s ease; }
 .category-card:hover { transform: translateY(-3px); border-color: #cfd2d5; background: #fff; color: var(--ink); }
 .category-card.active { color: var(--orange-dark); background: var(--soft-orange); border-color: rgba(242,99,34,.27); }
-.category-icon { display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 10px; color: currentColor; background: rgba(255,255,255,.8); border-radius: 13px; font-size: 21px; font-weight: 900; }
+.category-icon { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 10px; color: currentColor; background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.8); border-radius: 15px; font-size: 24px; line-height: 1; font-weight: 900; box-shadow: 0 7px 16px rgba(16,17,19,.06); }
 .category-card strong { display: block; overflow: hidden; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 
 .catalog { display: grid; grid-template-columns: 248px minmax(0,1fr); gap: 32px; align-items: start; padding-bottom: 100px; }

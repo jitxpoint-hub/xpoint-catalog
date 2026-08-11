@@ -1,16 +1,16 @@
 const CATEGORIES = [
   { name: "همه", icon: "X." },
-  { name: "موبایل", icon: "▯" },
-  { name: "اکسسوری", icon: "+" },
-  { name: "لپ تاپ", icon: "▱" },
-  { name: "گجت های خانگی", icon: "◇" },
-  { name: "تلویزیون", icon: "▣" },
-  { name: "اسپیکر", icon: "◉" },
-  { name: "لوازم خانگی", icon: "⌂" },
+  { name: "موبایل", icon: "📱" },
+  { name: "اکسسوری", icon: "🎧" },
+  { name: "لپ تاپ", icon: "💻" },
+  { name: "گجت های خانگی", icon: "⚙️" },
+  { name: "تلویزیون", icon: "📺" },
+  { name: "اسپیکر", icon: "🔊" },
+  { name: "لوازم خانگی", icon: "🏠" },
   { name: "تبلت", icon: "▯" },
-  { name: "کنسول بازی", icon: "✣" },
-  { name: "آرایشی / بهداشتی", icon: "✦" },
-  { name: "شارژر", icon: "⌁" }
+  { name: "کنسول بازی", icon: "🎮" },
+  { name: "آرایشی / بهداشتی", icon: "💄" },
+  { name: "شارژر", icon: "⚡" }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
