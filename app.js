@@ -1,9 +1,9 @@
 const CATEGORY_GROUPS = [
-  { name: "همه", icon: "X.", description: "تمام محصولات موجود کاتالوگ", imageCategories: [], children: [] },
-  { name: "لوازم خانگی", icon: "🏠", description: "یخچال، لباسشویی و ظرفشویی", imageCategories: ["یخچال", "لباسشویی", "ظرفشویی", "لوازم خانگی"], children: ["یخچال", "ظرفشویی", "لباسشویی"] },
-  { name: "کالای دیجیتال", icon: "⌘", description: "موبایل، لپ‌تاپ، گجت و اکسسوری", imageCategories: ["لپ تاپ", "موبایل", "کنسول بازی", "تبلت", "کالای دیجیتال"], children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
-  { name: "تلویزیون", icon: "📺", description: "انواع تلویزیون از برندهای معتبر", imageCategories: ["تلویزیون"], children: [] },
-  { name: "لوازم خانگی ریز", icon: "✦", description: "وسایل کوچک و کاربردی برای خانه", imageCategories: ["لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
+  { name: "همه", icon: "X.", description: "تمام محصولات موجود کاتالوگ", image: "assets/category-all.jpg", imageCategories: [], children: [] },
+  { name: "لوازم خانگی", icon: "🏠", description: "یخچال، لباسشویی و ظرفشویی", image: "assets/category-home.jpg", imageCategories: ["یخچال", "لباسشویی", "ظرفشویی", "لوازم خانگی"], children: ["یخچال", "ظرفشویی", "لباسشویی"] },
+  { name: "کالای دیجیتال", icon: "⌘", description: "موبایل، لپ‌تاپ، گجت و اکسسوری", image: "assets/category-digital.jpg", imageCategories: ["لپ تاپ", "موبایل", "کنسول بازی", "تبلت", "کالای دیجیتال"], children: ["موبایل", "لپ تاپ", "اکسسوری", "گجت", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"] },
+  { name: "تلویزیون", icon: "📺", description: "انواع تلویزیون از برندهای معتبر", image: "assets/category-tv.jpg", imageCategories: ["تلویزیون"], children: [] },
+  { name: "لوازم خانگی ریز", icon: "✦", description: "وسایل کوچک و کاربردی برای خانه", image: "assets/category-small-home.jpg", imageCategories: ["لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
 ];
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
@@ -199,7 +199,7 @@ function buildCategories() {
     const visual = document.createElement("span"), image = document.createElement("img"), shade = document.createElement("span");
     const content = document.createElement("span"), number = document.createElement("span"), title = document.createElement("strong"), description = document.createElement("small"), action = document.createElement("span");
     visual.className = "category-visual"; shade.className = "category-shade"; content.className = "category-content"; number.className = "category-number"; action.className = "category-action";
-    const representative = categoryRepresentativeImage(category);
+    const representative = category.image || categoryRepresentativeImage(category);
     image.src = representative; image.alt = ""; image.loading = "lazy"; image.addEventListener("error", () => { image.src = placeholder({ category: category.name }); }, { once: true });
     number.textContent = faNumber.format(index + 1).padStart(2, "۰"); title.textContent = category.name; description.textContent = category.description; action.innerHTML = `<span>${category.children.length ? "مشاهده زیرمجموعه‌ها" : "مشاهده محصولات"}</span><b aria-hidden="true">←</b>`;
     visual.append(image, shade); content.append(number, title, description, action); button.append(visual, content);
