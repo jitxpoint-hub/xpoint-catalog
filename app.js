@@ -67,6 +67,7 @@ function normalizeProduct(row, index) {
     code: pick(row, ["code", "sku", "productcode", "product_code", "کد", "کد محصول"]),
     price: parsePrice(pick(row, ["price", "cashprice", "cash_price", "قیمت", "قیمت نقد"])),
     category: canonicalCategory(pick(row, ["category", "دسته", "دسته بندی", "دسته‌بندی"])),
+    description: pick(row, ["description", "desc", "توضیحات", "شرح"]),
     image: driveImageUrl(image),
     // قیمت، منبع اصلی وضعیت موجودی است: محصول دارای قیمت همیشه موجود است.
     stock: "موجود"
@@ -269,7 +270,7 @@ function openProductModal(product) {
   image.onerror = () => { image.src = placeholder(product); };
   document.querySelector("#modalProductCategory").textContent = product.category || "X.Point";
   document.querySelector("#modalProductName").textContent = product.name;
-  document.querySelector("#modalProductDescription").textContent = `محصول ${product.brand} در دسته ${product.category || "محصولات دیجیتال"}. برای دریافت مشخصات کامل و جزئیات فنی، اطلاعات ثبت‌شده در شیت را بررسی کنید.`;
+  document.querySelector("#modalProductDescription").textContent = product.description || `محصول ${product.brand} در دسته ${product.category || "محصولات دیجیتال"}.`;
   document.querySelector("#modalProductBrand").textContent = product.brand;
   document.querySelector("#modalProductCode").textContent = product.code;
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
