@@ -62,13 +62,16 @@
     <section class="catalog shell" id="products" aria-labelledby="products-title">
       <aside class="filters" aria-label="فیلتر محصولات">
         <div class="filter-head">
-          <div>
-            <span class="filter-kicker">فیلتر دقیق</span>
-            <h2>برندها</h2>
-          </div>
-          <button id="clearFilters" type="button">پاک کردن</button>
+          <button class="brand-filter-toggle" id="brandFilterToggle" type="button" aria-expanded="false" aria-controls="brandFilters">
+            <span class="brand-filter-title">
+              <span class="filter-kicker">فیلتر دقیق</span>
+              <span class="brand-filter-name">برندها</span>
+            </span>
+            <span class="filter-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <button class="clear-filters" id="clearFilters" type="button">پاک کردن</button>
         </div>
-        <div id="brandFilters" class="brand-filters"></div>
+        <div id="brandFilters" class="brand-filters" hidden></div>
         <div class="value-card" id="guide">
           <span class="value-mark">X.</span>
           <p>ارزش خرید فقط قیمت نیست.</p>
