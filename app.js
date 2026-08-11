@@ -252,6 +252,7 @@ function productCard(product) {
   fragment.querySelector(".product-brand").textContent = product.brand;
   fragment.querySelector(".product-code").textContent = `کد ${product.code}`;
   fragment.querySelector(".product-name").textContent = product.name;
+  fragment.querySelector(".product-category").textContent = product.category || "";
   const price = fragment.querySelector(".product-price");
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);

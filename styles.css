@@ -153,6 +153,7 @@ nav a:hover { color: var(--orange); }
 .price-block > span { color: var(--muted); font-size: 9px; }
 .product-price { font-size: 15px; letter-spacing: -.4px; }
 .product-price small { margin-right: 4px; color: var(--muted); font-size: 8px; font-weight: 700; }
+.product-category { display: block; margin-top: 7px; color: var(--muted); font-size: 10px; font-weight: 700; }
 .product-card { cursor: pointer; }
 .product-modal { width: min(860px, calc(100% - 28px)); max-width: 860px; padding: 0; overflow: hidden; color: var(--ink); background: var(--card); border: 0; border-radius: 26px; box-shadow: 0 28px 90px rgba(16,17,19,.28); }
 .product-modal::backdrop { background: rgba(16,17,19,.48); backdrop-filter: blur(5px); }
