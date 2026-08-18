@@ -27,6 +27,46 @@ const faNumber = new Intl.NumberFormat("fa-IR");
 const normalize = value => String(value ?? "").trim();
 const digitsToEnglish = value => normalize(value).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 const parsePrice = value => Number(digitsToEnglish(value).replace(/[^\d.]/g, "")) || 0;
+const PRODUCT_COLOR_PALETTE = {
+  "مشکی": "#202225", "سیاه": "#202225", "black": "#202225",
+  "سفید": "#f8f8f5", "white": "#f8f8f5",
+  "نارنجی": "#f26322", "orange": "#f26322",
+  "آبی": "#4f7fc5", "ابی": "#4f7fc5", "blue": "#4f7fc5",
+  "آبیروشن": "#8fc8df", "ابیروشن": "#8fc8df", "lightblue": "#8fc8df",
+  "سرمه‌ای": "#273958", "سرمه ای": "#273958", "سرمهای": "#273958", "navy": "#273958",
+  "سبز": "#638f68", "green": "#638f68",
+  "قرمز": "#c54f4f", "red": "#c54f4f",
+  "صورتی": "#e5a0b3", "pink": "#e5a0b3",
+  "بنفش": "#8469ad", "purple": "#8469ad",
+  "یاسی": "#b8a2d5", "lilac": "#b8a2d5",
+  "زرد": "#e4c449", "yellow": "#e4c449",
+  "طلایی": "#c6a15c", "gold": "#c6a15c",
+  "نقره‌ای": "#b7bbc0", "نقره ای": "#b7bbc0", "نقرهای": "#b7bbc0", "silver": "#b7bbc0",
+  "خاکستری": "#777d84", "طوسی": "#777d84", "gray": "#777d84", "grey": "#777d84",
+  "کرم": "#d8c6a3", "cream": "#d8c6a3",
+  "قهوه‌ای": "#825c48", "قهوه ای": "#825c48", "قهوهای": "#825c48", "brown": "#825c48",
+  "رزگلد": "#c98f7d", "rosegold": "#c98f7d"
+};
+
+function compactColorName(value) {
+  return normalize(value).replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\s_-]+/g, "").toLocaleLowerCase("fa");
+}
+
+function parseProductColors(value) {
+  const safeHex = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
+  const palette = new Map(Object.entries(PRODUCT_COLOR_PALETTE).map(([name, hex]) => [compactColorName(name), hex]));
+  const seen = new Set();
+  return normalize(value).split(/[,،;؛|/]+/).map(normalize).filter(Boolean).map(token => {
+    const custom = token.match(/^(.+?)\s*:\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)$/i);
+    const label = normalize(custom ? custom[1] : token);
+    const swatch = custom ? custom[2] : (safeHex.test(token) ? token : palette.get(compactColorName(token)));
+    if (!swatch) return null;
+    const key = `${compactColorName(label)}|${swatch.toLowerCase()}`;
+    if (seen.has(key)) return null;
+    seen.add(key);
+    return { name: label, value: swatch };
+  }).filter(Boolean);
+}
 
 function parseCsv(text) {
   const rows = []; let row = []; let cell = ""; let quoted = false;
@@ -62,6 +102,7 @@ function normalizeProduct(row, index) {
     category: canonicalCategory(pick(row, ["category", "دسته", "دسته بندی", "دسته‌بندی"])),
     description: pick(row, ["description", "desc", "توضیحات", "شرح"]),
     image: driveImageUrl(image),
+    colors: parseProductColors(pick(row, ["colors", "colour", "color", "رنگ‌ها", "رنگ ها", "رنگ"])),
     // قیمت، منبع اصلی وضعیت موجودی است: محصول دارای قیمت همیشه موجود است.
     stock: "موجود"
   };
@@ -287,6 +328,7 @@ function productCard(product) {
   fragment.querySelector(".product-code").textContent = `کد ${product.code}`;
   fragment.querySelector(".product-name").textContent = product.name;
   fragment.querySelector(".product-category").textContent = product.category || "";
+  renderColorDots(fragment.querySelector(".product-colors"), product.colors);
   const price = fragment.querySelector(".product-price");
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);
@@ -306,8 +348,26 @@ function openProductModal(product) {
   document.querySelector("#modalProductBrand").textContent = product.brand;
   document.querySelector("#modalProductCode").textContent = product.code;
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
+  renderColorDots(document.querySelector("#modalProductColors"), product.colors);
+  document.querySelector("#modalProductColorRow").hidden = !product.colors.length;
   document.querySelector("#modalProductPrice").innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : "تماس بگیرید";
   modal.showModal();
+}
+
+function renderColorDots(container, colors = []) {
+  if (!container) return;
+  container.replaceChildren(...colors.map(color => {
+    const dot = document.createElement("span");
+    dot.className = "color-dot";
+    dot.style.setProperty("--swatch", color.value);
+    dot.title = color.name;
+    dot.setAttribute("role", "img");
+    dot.setAttribute("aria-label", color.name);
+    return dot;
+  }));
+  container.hidden = !colors.length;
+  if (colors.length) container.setAttribute("aria-label", `رنگ‌های موجود: ${colors.map(color => color.name).join("، ")}`);
+  else container.removeAttribute("aria-label");
 }
 
 document.querySelector("#modalClose").addEventListener("click", () => document.querySelector("#productModal").close());

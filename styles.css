@@ -227,7 +227,12 @@ nav a:hover { color: var(--orange); }
 .price-block > span { color: var(--muted); font-size: 9px; }
 .product-price { font-size: 15px; letter-spacing: -.4px; }
 .product-price small { margin-right: 4px; color: var(--muted); font-size: 8px; font-weight: 700; }
-.product-category { display: block; margin-top: 7px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.product-taxonomy { display: flex; min-height: 20px; align-items: center; justify-content: space-between; gap: 10px; margin-top: 7px; }
+.product-category { display: block; color: var(--muted); font-size: 10px; font-weight: 700; }
+.product-colors, .modal-product-colors { display: flex; align-items: center; gap: 7px; direction: rtl; }
+.product-colors[hidden], .modal-color-row[hidden] { display: none; }
+.color-dot { width: 14px; height: 14px; flex: 0 0 14px; background: var(--swatch); border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px rgba(16,17,19,.2), 0 2px 5px rgba(16,17,19,.12); transition: transform .2s ease, box-shadow .2s ease; }
+.color-dot:hover { transform: translateY(-1px) scale(1.12); box-shadow: 0 0 0 1px rgba(16,17,19,.28), 0 4px 8px rgba(16,17,19,.16); }
 .product-card { cursor: pointer; }
 .product-modal { width: min(860px, calc(100% - 28px)); max-width: 860px; padding: 0; overflow: hidden; color: var(--ink); background: var(--card); border: 0; border-radius: 26px; box-shadow: 0 28px 90px rgba(16,17,19,.28); }
 .product-modal::backdrop { background: rgba(16,17,19,.48); backdrop-filter: blur(5px); }
@@ -239,6 +244,9 @@ nav a:hover { color: var(--orange); }
 .modal-category { color: var(--orange); font-size: 11px; font-weight: 900; }
 .modal-copy h2 { margin: 12px 0 14px; font-size: clamp(22px, 3vw, 34px); line-height: 1.35; }
 .modal-description { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 2; }
+.modal-color-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -8px 0 20px; padding: 11px 13px; background: #f5f6f6; border: 1px solid rgba(16,17,19,.05); border-radius: 12px; }
+.modal-color-row > span { color: var(--muted); font-size: 10px; font-weight: 750; }
+.modal-product-colors .color-dot { width: 21px; height: 21px; flex-basis: 21px; }
 .modal-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 26px; }
 .modal-details div { padding: 12px; background: #f5f6f6; border-radius: 12px; }
 .modal-details dt { color: var(--muted); font-size: 10px; }
