@@ -6,7 +6,7 @@
  * 3) آدرس /exec را در config.js مقابل bannerFeedUrl قرار دهید.
  */
 
-const XPOINT_BANNER_FOLDER_ID = "1eGzI4v0Lgj0I1SHQjWdDYjCXIghB6eD8";
+const XPOINT_BANNER_FOLDER_ID = "10z96SA3t1pFmb9jkj-ExfBInb6JUtrIz";
 const XPOINT_MAX_BANNERS = 20;
 
 function doGet(event) {

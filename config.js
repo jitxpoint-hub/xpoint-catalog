@@ -4,9 +4,9 @@
  * اگر خالی باشد، سایت از products.sample.json استفاده می‌کند.
  */
 window.XPOINT_CONFIG = {
-  googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/1H6eUwY7o-LLsIYYlN2yL3hf_MYG1mrp5wOjDpeXi6NA/export?format=csv&gid=0",
+  googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/1bVSa_MVZhf5hVa3KVeLkU3V4DgyXePsnsV1MupEJa7M/export?format=csv&gid=71366496",
   // آدرس Web App ساخته‌شده با فایل google-apps-script/BannerFeed.gs
-  bannerFeedUrl: "https://script.google.com/macros/s/AKfycbwSDnekEJneELVjWHgNL_R67y2wYbmu8JFiB3FXFqIdbyOY2_dtH6ypGruHbtGD9U4n/exec",
+  bannerFeedUrl: "https://script.google.com/macros/s/AKfycbyYNK_mgq0L3Zns1L5VNbIBgZaUn6enxxv-W2-uobJpsrxMRxgmTlXWhtyJh1qliua2IQ/exec",
   bannerRotationMs: 5500,
   bannerRefreshMs: 14400000,
   fallbackDataUrl: "products.sample.json",
