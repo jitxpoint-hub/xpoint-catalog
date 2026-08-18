@@ -1,0 +1,59 @@
+name: Backup catalog data
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download current catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data .catalog-backup
+          curl --fail --location --retry 3 \
+            "https://docs.google.com/spreadsheets/d/1bVSa_MVZhf5hVa3KVeLkU3V4DgyXePsnsV1MupEJa7M/export?format=csv&gid=71366496" \
+            --output .catalog-backup/products.csv
+          curl --fail --location --retry 3 \
+            "https://docs.google.com/spreadsheets/d/1bVSa_MVZhf5hVa3KVeLkU3V4DgyXePsnsV1MupEJa7M/export?format=xlsx" \
+            --output .catalog-backup/xpoint-products.xlsx
+          test -s .catalog-backup/products.csv
+          test -s .catalog-backup/xpoint-products.xlsx
+
+      - name: Update backup only when catalog changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f data/products.csv && cmp --silent data/products.csv .catalog-backup/products.csv; then
+            echo "Catalog data is unchanged."
+            exit 0
+          fi
+          mv .catalog-backup/products.csv data/products.csv
+          mv .catalog-backup/xpoint-products.xlsx data/xpoint-products.xlsx
+
+      - name: Commit backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add data/products.csv data/xpoint-products.xlsx
+          if git diff --cached --quiet; then
+            echo "No backup changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: backup catalog data"
+          git push
