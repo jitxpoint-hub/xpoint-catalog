@@ -291,8 +291,32 @@ function productCard(product) {
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);
   stock.textContent = isOut ? "ناموجود" : product.stock; stock.classList.toggle("out", isOut);
+  card.tabIndex = 0; card.setAttribute("role", "button"); card.setAttribute("aria-label", `مشاهده جزئیات ${product.name}`);
   card.addEventListener("click", () => openProductModal(product));
+  card.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openProductModal(product); }
+  });
   card.dataset.code = product.code; return fragment;
+}
+
+let modalTrigger = null;
+let modalScrollY = 0;
+
+function lockPageForModal() {
+  if (document.documentElement.classList.contains("modal-open")) return;
+  modalScrollY = window.scrollY;
+  document.body.style.top = `-${modalScrollY}px`;
+  document.documentElement.classList.add("modal-open");
+}
+
+function unlockPageAfterModal() {
+  if (!document.documentElement.classList.contains("modal-open")) return;
+  document.documentElement.classList.remove("modal-open");
+  document.body.style.top = "";
+  const previousBehavior = document.documentElement.style.scrollBehavior;
+  document.documentElement.style.scrollBehavior = "auto";
+  window.scrollTo(0, modalScrollY);
+  document.documentElement.style.scrollBehavior = previousBehavior;
 }
 
 function openProductModal(product) {
@@ -307,11 +331,23 @@ function openProductModal(product) {
   document.querySelector("#modalProductCode").textContent = product.code;
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
   document.querySelector("#modalProductPrice").innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : "تماس بگیرید";
-  modal.showModal();
+  modalTrigger = document.activeElement;
+  lockPageForModal();
+  modal.hidden = false;
+  document.querySelector("#modalClose").focus({ preventScroll: true });
 }
 
-document.querySelector("#modalClose").addEventListener("click", () => document.querySelector("#productModal").close());
-document.querySelector("#productModal").addEventListener("click", event => { if (event.target.id === "productModal") event.target.close(); });
+function closeProductModal() {
+  const modal = document.querySelector("#productModal");
+  if (modal.hidden) return;
+  modal.hidden = true;
+  unlockPageAfterModal();
+  if (modalTrigger instanceof HTMLElement) modalTrigger.focus({ preventScroll: true });
+}
+
+document.querySelector("#modalClose").addEventListener("click", closeProductModal);
+document.querySelector("#productModal").addEventListener("click", event => { if (event.target.id === "productModal") closeProductModal(); });
+document.addEventListener("keydown", event => { if (event.key === "Escape") closeProductModal(); });
 
 function renderActiveFilters() {
   const chips = [];
