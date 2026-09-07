@@ -146,15 +146,16 @@ function applyMediaEnhancements(products) {
 
   const speaker = products.find(item => item.code === "1001619");
   if (speaker) {
-    const defaultImages = [
-      ...Array.from({ length: 12 }, (_, index) => `assets/jbl-partybox-520-${String(index + 1).padStart(2, "0")}.webp`),
-      "assets/jbl-partybox-520-v2-front.png",
-      "assets/jbl-partybox-520-v2-rear.png"
+    const mainPhoto = "https://drive.google.com/file/d/10BIP0fYBZIiQ2Xfj7Xoh3EVkqci7kp_e/view?usp=drive_link";
+    const galleryPhotos = [
+      "https://drive.google.com/open?id=13BO0iE7WizilDm3kHJ9JeyJpKUbsV4G1&usp=drive_copy",
+      "https://drive.google.com/open?id=1RDegl5BY5grcABygQ6zoaCFWN0qM58hI&usp=drive_copy",
+      "https://drive.google.com/open?id=1hE_agVb5Xfw-7K_I-_-6bwtVTsi7-3Ms&usp=drive_copy"
     ];
-    if (!speaker.image) speaker.image = defaultImages[0];
-    if (!speaker.images?.length || speaker.images.length === 1) speaker.images = [speaker.image, ...defaultImages.filter(url => url !== speaker.image)];
-    if (!speaker.video) speaker.video = "assets/jbl-partybox-520.webm";
-    if (!speaker.view360) speaker.view360 = "assets/jbl-partybox-520-glb.html";
+    speaker.image = driveImageUrl(mainPhoto);
+    speaker.images = [speaker.image, ...galleryPhotos.map(driveImageUrl).filter(Boolean)];
+    speaker.video = normalizeMediaUrl("https://drive.google.com/file/d/1B0jGnzpsf7so8TBpi9w8tXAOgGL9w7A3/view?usp=drive_link");
+    speaker.view360 = normalizeMediaUrl("https://drive.google.com/file/d/1FNYJPnjSpC1j12lCnUUwQKXsGGMH1uzC/view?usp=drive_link");
     if (!speaker.description) speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
   }
 }
