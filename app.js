@@ -6,10 +6,22 @@ const CATEGORY_GROUPS = [
   { name: "گجت خانگی", icon: "✦", description: "گجت‌ها و ابزارهای هوشمند و کاربردی خانه", image: "assets/category-small-home.jpg", imageCategories: ["گجت خانگی", "لوازم خانگی ریز", "گجت", "گجت های خانگی"], children: [] }
 ];
 
+const SUBCATEGORY_ICONS = {
+  "یخچال": "fridge", "ظرفشویی": "dishwasher", "لباسشویی": "washer",
+  "موبایل": "phone", "لپ تاپ": "laptop", "اکسسوری": "headphones",
+  "گجت": "watch", "اسپیکر": "speaker", "تبلت": "tablet",
+  "کنسول بازی": "gamepad", "شارژر": "charger", "تلویزیون": "tv",
+  "نظافت خانه": "vacuum", "آشپزخانه و پخت‌وپز": "cooking", "قهوه و نوشیدنی": "coffee",
+  "تهویه و هوای خانه": "air", "سلامت و ابزارهای هوشمند": "health",
+  "ساعت و مچ‌بند هوشمند": "watch", "هدفون و هندزفری": "headphones"
+};
+
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
+let categoryNodes = new Map();
 const bannerState = { items: [], index: 0, rotationTimer: null, refreshTimer: null };
 const el = {
   rail: document.querySelector("#categoryRail"), subrail: document.querySelector("#subcategoryRail"), brandFilters: document.querySelector("#brandFilters"),
+  brandContext: document.querySelector("#brandFilterContext"),
   grid: document.querySelector("#productGrid"), template: document.querySelector("#productTemplate"),
   count: document.querySelector("#resultCount"), search: document.querySelector("#searchInput"),
   sort: document.querySelector("#sortSelect"), clear: document.querySelector("#clearFilters"),
@@ -51,20 +63,95 @@ function pick(row, keys) {
   return "";
 }
 
+function splitMediaList(value) {
+  return normalize(value).split(/[|\n]+/).map(item => item.trim()).filter(Boolean);
+}
+
+function normalizeMediaUrl(value) {
+  const raw = normalize(value);
+  if (!raw || !/^https?:\/\//i.test(raw)) return "";
+  const drive = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
+  if (drive) return `https://drive.google.com/file/d/${drive[1]}/preview`;
+  const youtube = raw.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,})/i);
+  if (youtube) return `https://www.youtube-nocookie.com/embed/${youtube[1]}`;
+  const aparat = raw.match(/aparat\.com\/v\/([\w-]+)/i);
+  if (aparat) return `https://www.aparat.com/video/video/embed/videohash/${aparat[1]}/vt/frame`;
+  return raw;
+}
+
 function normalizeProduct(row, index) {
   const image = pick(row, ["image", "imageurl", "image_url", "photo", "عکس", "تصویر", "لینک عکس", "آدرس تصویر"]);
-  return {
+  const listedImages = splitMediaList(pick(row, ["images", "gallery", "تصاویر", "تصاویر بیشتر", "عکس‌های بیشتر", "عکس های بیشتر"]));
+  const extraImages = [1, 2, 3, 4, 5, 6].map(number => pick(row, [`image${number}`, `image_${number}`, `عکس ${number}`, `تصویر ${number}`]));
+  const images = [image, ...listedImages, ...extraImages].map(driveImageUrl).filter((url, position, all) => url && all.indexOf(url) === position);
+  const product = {
     id: pick(row, ["id", "ردیف"]) || String(index + 1),
     name: pick(row, ["name", "product", "productname", "product_name", "نام", "نام محصول"]),
     brand: pick(row, ["brand", "برند"]),
     code: pick(row, ["code", "sku", "productcode", "product_code", "کد", "کد محصول"]),
     price: parsePrice(pick(row, ["price", "cashprice", "cash_price", "قیمت", "قیمت نقد"])),
     category: canonicalCategory(pick(row, ["category", "دسته", "دسته بندی", "دسته‌بندی"])),
+    group: pick(row, ["group", "گروه اصلی"]),
+    subcategory: pick(row, ["subcategory", "زیرمجموعه", "زیر دسته", "زیر‌دسته", "زیر دسته‌بندی"]),
     description: pick(row, ["description", "desc", "توضیحات", "شرح"]),
-    image: driveImageUrl(image),
+    image: images[0] || "",
+    images,
+    video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "لینک ویدئو", "لینک ویدیو"])),
+    view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "نمای ۳۶۰", "نمای 360", "مدل سه بعدی", "لینک سه بعدی"])),
     // قیمت، منبع اصلی وضعیت موجودی است: محصول دارای قیمت همیشه موجود است.
     stock: "موجود"
   };
+  if (product.category === "یخچال و فریزر") {
+    product.category = /لباسشویی/.test(`${product.name} ${product.group}`) ? "لباسشویی" : "یخچال";
+  }
+  return product;
+}
+
+function applyMediaEnhancements(products) {
+  if (!products.length) return;
+  const previewCode = "1103961018";
+  let product = products.find(item => item.code === previewCode);
+  if (!product && window.location?.hostname === "127.0.0.1") {
+    const catalogProduct = state.catalog.find(item => item.code === previewCode);
+    product = {
+      ...(catalogProduct || {}),
+      id: catalogProduct?.id || "preview-iphone-17-mist-blue",
+      name: catalogProduct?.name || "iPhone 17 256GB CH/A Non Active Mist Blue",
+      brand: catalogProduct?.brand || "اپل",
+      code: previewCode,
+      price: 364527000,
+      category: "موبایل",
+      group: "کالای دیجیتال",
+      subcategory: "موبایل",
+      stock: "موجود"
+    };
+    products.unshift(product);
+  }
+  if (product) {
+    product.image = "assets/iphone-17-mist-blue-01.webp";
+    product.images = [
+      "assets/iphone-17-mist-blue-01.webp",
+      "assets/iphone-17-mist-blue-02.webp",
+      "assets/iphone-17-gallery-03.webp",
+      "assets/iphone-17-gallery-04.webp",
+      "assets/iphone-17-black.webp",
+      "assets/iphone-17-white.webp",
+      "assets/iphone-17-sage.webp",
+      "assets/iphone-17-lavender.webp"
+    ];
+    product.video = "assets/iphone-17-mist-blue.webm";
+    product.view360 = "assets/demo-product-360.html";
+    product.description = "آیفون ۱۷ با حافظه داخلی ۲۵۶ گیگابایت و رنگ Mist Blue، برای استفاده روزمره، عکاسی و اجرای روان برنامه‌ها طراحی شده است. نسخه CH/A این محصول به‌صورت Non Active عرضه می‌شود.\n• حافظه داخلی ۲۵۶ گیگابایت\n• رنگ Mist Blue\n• پارت‌نامبر CH/A\n• وضعیت فعال‌سازی Non Active\n• گالری تصاویر شامل نماهای مختلف و رنگ‌بندی محصول";
+  }
+
+  const speaker = products.find(item => item.code === "1001619");
+  if (speaker) {
+    speaker.image = "assets/jbl-partybox-520-01.webp";
+    speaker.images = Array.from({ length: 12 }, (_, index) => `assets/jbl-partybox-520-${String(index + 1).padStart(2, "0")}.webp`);
+    speaker.video = "assets/jbl-partybox-520.webm";
+    speaker.view360 = "assets/jbl-partybox-520-glb.html";
+    speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
+  }
 }
 
 function canonicalCategory(value) {
@@ -73,7 +160,7 @@ function canonicalCategory(value) {
     .replace(/[\u200c\s_-]+/g, "")
     .toLocaleLowerCase("fa");
   const aliases = {
-    "لوازمخانگی": "لوازم خانگی", "گجتهایخانگی": "گجت",
+    "لوازمخانگی": "لوازم خانگی", "گجتهایخانگی": "گجت خانگی", "لوازمخانگیریز": "گجت خانگی", "گجتخانگی": "گجت خانگی",
     "تلویزیون": "تلویزیون", "تلوزیون": "تلویزیون", "اسپیکر": "اسپیکر",
     "کنسولبازی": "کنسول بازی", "لپتاپ": "لپ تاپ", "تبلت": "تبلت",
     "اکسسوری": "اکسسوری", "موبایل": "موبایل", "آرایشیبهداشتی": "اکسسوری",
@@ -116,6 +203,7 @@ async function loadProducts() {
     // ردیف‌های بدون قیمت یا با قیمت صفر، به‌طور کامل از سایت حذف می‌شوند.
     state.catalog = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
     state.products = state.catalog.filter(p => p.price > 0);
+    applyMediaEnhancements(state.products);
     buildCategories(); buildBrandFilters(); render();
   } catch (error) {
     try {
@@ -124,6 +212,7 @@ async function loadProducts() {
       const fallbackRaw = await fallbackResponse.json();
       state.catalog = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
       state.products = state.catalog.filter(p => p.price > 0);
+      applyMediaEnhancements(state.products);
       buildCategories(); buildBrandFilters(); render();
       el.error.hidden = true;
     } catch (fallbackError) {
@@ -193,26 +282,30 @@ function showBanner(index) {
 }
 
 function buildCategories() {
+  categoryNodes = window.XPointCategoryTree.build(CATEGORY_GROUPS, state.catalog, baseProductsForCategory);
+  if (!categoryNodes.has(state.category)) state.category = "همه";
   el.rail.replaceChildren(...CATEGORY_GROUPS.map((category, index) => {
+    const hasChildren = category.name !== "همه" && categoryNodes.get(category.name).children.length > 0;
     const button = document.createElement("button");
-    button.type = "button"; button.className = "category-card"; button.dataset.category = category.name; button.setAttribute("role", "listitem");
+    button.type = "button"; button.className = "category-card"; button.dataset.category = category.name;
     const visual = document.createElement("span"), image = document.createElement("img"), shade = document.createElement("span");
-    const content = document.createElement("span"), number = document.createElement("span"), title = document.createElement("strong"), description = document.createElement("small"), action = document.createElement("span");
+    const content = document.createElement("span"), number = document.createElement("span"), title = document.createElement("strong"), description = document.createElement("small"), action = document.createElement("span"), count = document.createElement("span");
     visual.className = "category-visual"; shade.className = "category-shade"; content.className = "category-content"; number.className = "category-number"; action.className = "category-action";
     const representative = category.image || categoryRepresentativeImage(category);
     image.src = representative; image.alt = ""; image.loading = "lazy"; image.addEventListener("error", () => { image.src = placeholder({ category: category.name }); }, { once: true });
-    number.textContent = faNumber.format(index + 1).padStart(2, "۰"); title.textContent = category.name; description.textContent = category.description; action.innerHTML = `<span>${category.children.length ? "مشاهده زیرمجموعه‌ها" : "مشاهده محصولات"}</span><b aria-hidden="true">←</b>`;
-    visual.append(image, shade); content.append(number, title, description, action); button.append(visual, content);
-    if (category.children.length) button.setAttribute("aria-controls", "subcategoryRail");
+    const categoryCount = productsForCategory(category.name).length;
+    number.textContent = faNumber.format(index + 1).padStart(2, "۰"); title.textContent = category.name; description.textContent = category.description;
+    count.className = "category-count"; count.textContent = `${faNumber.format(categoryCount)} کالا`;
+    action.innerHTML = `<span>${hasChildren ? "مشاهده زیرمجموعه‌ها" : "مشاهده محصولات"}</span><b aria-hidden="true">←</b>`;
+    visual.append(image, shade); content.append(number, title, description, count, action); button.append(visual, content);
+    if (hasChildren) button.setAttribute("aria-controls", "subcategoryRail");
     button.addEventListener("click", () => {
-      state.category = category.name; renderSubcategories(category); render();
-      const target = category.children.length ? el.subrail : document.querySelector("#products");
-      requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: category.children.length ? "nearest" : "start" }));
+      selectCategory(category.name);
+      scrollCategorySelection();
     });
     return button;
   }));
-  const selectedGroup = CATEGORY_GROUPS.find(group => group.name === state.category || group.children.includes(state.category)) || CATEGORY_GROUPS[0];
-  renderSubcategories(selectedGroup);
+  renderSubcategories();
 }
 
 function categoryRepresentativeImage(category) {
@@ -224,20 +317,65 @@ function categoryRepresentativeImage(category) {
   return state.catalog.find(item => item.image)?.image || placeholder({ category: category.name });
 }
 
-function renderSubcategories(group) {
+function renderSubcategories() {
   if (!el.subrail) return;
-  el.subrail.replaceChildren(...(group.children || []).map(name => {
+  const selected = categoryNodes.get(state.category);
+  const group = selected?.children.length ? selected : categoryNodes.get(selected?.parent);
+  if (state.category === "همه" || !group?.children.length) { el.subrail.hidden = true; el.subrail.replaceChildren(); return; }
+
+  const breadcrumbs = document.createElement("nav"); breadcrumbs.className = "category-breadcrumbs"; breadcrumbs.setAttribute("aria-label", "مسیر دسته‌بندی");
+  categoryPath(group.id).forEach((node, index, path) => {
+    const button = document.createElement("button"); button.type = "button"; button.textContent = node.label;
+    if (index === path.length - 1) button.setAttribute("aria-current", "location");
+    button.addEventListener("click", () => { selectCategory(node.id); scrollCategorySelection(); });
+    breadcrumbs.append(button);
+    if (index < path.length - 1) { const divider = document.createElement("span"); divider.textContent = "‹"; divider.setAttribute("aria-hidden", "true"); breadcrumbs.append(divider); }
+  });
+
+  const header = document.createElement("div"); header.className = "subcategory-head";
+  const headingCopy = document.createElement("div"), eyebrow = document.createElement("span"), title = document.createElement("strong"), hint = document.createElement("small");
+  eyebrow.textContent = "انتخاب دقیق‌تر"; title.textContent = `زیرمجموعه‌های ${group.label}`; title.tabIndex = -1; title.id = "subcategoryTitle";
+  hint.textContent = "نوع کالا را انتخاب کنید؛ از مسیر بالا به دستهٔ قبلی برگردید.";
+  headingCopy.append(eyebrow, title, hint); header.append(headingCopy);
+
+  const grid = document.createElement("div"); grid.className = "subcategory-grid";
+  const options = [{ name: group.id, label: `همه ${group.label}`, all: true }, ...group.children.map(id => ({ name: id, label: categoryNodes.get(id).label, all: false }))];
+  grid.replaceChildren(...options.map(option => {
+    const name = option.name;
     const button = document.createElement("button");
-    button.type = "button"; button.className = "subcategory-chip"; button.textContent = name; button.dataset.category = name;
-    button.addEventListener("click", () => { state.category = name; render(); document.querySelector("#products").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    const icon = document.createElement("span"), copy = document.createElement("span"), label = document.createElement("strong"), count = document.createElement("small"), arrow = document.createElement("b");
+    button.type = "button"; button.className = `subcategory-card${option.all ? " subcategory-all" : ""}`; button.dataset.category = name;
+    const node = categoryNodes.get(name), hasChildren = !option.all && node.children.length > 0;
+    const productCount = productsForCategory(name).length;
+    const inheritedIcon = categoryPath(name).reverse().map(item => SUBCATEGORY_ICONS[item.label]).find(Boolean);
+    icon.className = "subcategory-icon"; icon.innerHTML = subcategoryIcon(option.all ? "grid" : inheritedIcon); icon.setAttribute("aria-hidden", "true");
+    copy.className = "subcategory-copy"; label.textContent = option.label;
+    count.textContent = productCount ? `${faNumber.format(productCount)} کالای موجود` : "فعلاً ناموجود";
+    if (hasChildren) count.textContent += ` · ${faNumber.format(node.children.length)} زیرمجموعه`;
+    button.classList.toggle("is-unavailable", !productCount); copy.append(label, count);
+    if (hasChildren) { button.setAttribute("aria-controls", "subcategoryRail"); button.setAttribute("aria-expanded", "false"); }
+    arrow.textContent = "←"; arrow.setAttribute("aria-hidden", "true"); button.append(icon, copy, arrow);
+    button.addEventListener("click", () => {
+      selectCategory(name);
+      if (hasChildren) { document.querySelector("#subcategoryTitle")?.focus({ preventScroll: true }); scrollCategorySelection(); }
+      else document.querySelector("#products").scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+    });
     return button;
   }));
-  el.subrail.hidden = !(group.children && group.children.length);
+  el.subrail.replaceChildren(breadcrumbs, header, grid);
+  el.subrail.hidden = false;
 }
 
 function buildBrandFilters() {
-  const counts = state.catalog.reduce((map, product) => map.set(product.brand, (map.get(product.brand) || 0) + 1), new Map());
+  const categoryProducts = productsForCategory(state.category);
+  const counts = categoryProducts.reduce((map, product) => map.set(product.brand, (map.get(product.brand) || 0) + 1), new Map());
   const brands = [...counts.keys()].sort((a,b) => a.localeCompare(b,"fa"));
+  const allowedBrands = new Set(brands);
+  state.brands = new Set([...state.brands].filter(brand => allowedBrands.has(brand)));
+  if (el.brandContext) el.brandContext.textContent = state.category === "همه" ? "برای همه محصولات" : `مرتبط با ${categoryNodes.get(state.category)?.label || state.category}`;
+  if (!brands.length) {
+    const empty = document.createElement("p"); empty.className = "brand-empty"; empty.textContent = "برای این دسته برندی پیدا نشد."; el.brandFilters.replaceChildren(empty); return;
+  }
   el.brandFilters.replaceChildren(...brands.map(brand => {
     const label = document.createElement("label"); label.className = "brand-option";
     const left = document.createElement("span"), input = document.createElement("input"), text = document.createElement("span"), count = document.createElement("i");
@@ -247,18 +385,71 @@ function buildBrandFilters() {
   }));
 }
 
+function categoryPath(selection) {
+  const path = []; let node = categoryNodes.get(selection);
+  while (node) { path.unshift(node); node = categoryNodes.get(node.parent); }
+  return path;
+}
+
+function categorySetFor(selection) {
+  if (selection === "همه") return null;
+  const group = CATEGORY_GROUPS.find(item => item.name === selection);
+  if (!group) return new Set([canonicalCategory(selection)]);
+  return new Set([group.name, ...group.children].map(canonicalCategory));
+}
+
+function baseProductsForCategory(selection, source = state.products) {
+  const categories = categorySetFor(selection);
+  return categories ? source.filter(product => categories.has(product.category)) : [...source];
+}
+
+function productsForCategory(selection, source = state.products) {
+  const node = categoryNodes.get(selection);
+  return node ? source.filter(node.matches) : baseProductsForCategory(selection, source);
+}
+
+function scrollBehavior() { return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"; }
+function scrollCategorySelection() {
+  requestAnimationFrame(() => (el.subrail.hidden ? document.querySelector("#categories") : el.subrail).scrollIntoView({ behavior: scrollBehavior(), block: "start" }));
+}
+
+function selectCategory(name) {
+  state.category = name;
+  renderSubcategories();
+  buildBrandFilters();
+  render();
+}
+
+function subcategoryIcon(name = "grid") {
+  const paths = {
+    tv: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M12 17v4M7 21h10"/>',
+    vacuum: '<rect x="3" y="13" width="11" height="7" rx="3"/><path d="M6 20v1M12 20v1M10 13V7a4 4 0 0 1 8 0v12M16 21h6M18 19l2 2"/>',
+    cooking: '<path d="M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2ZM3 9h18M2 13h3M19 13h3M9 6V3M15 6V3"/>',
+    coffee: '<path d="M4 8h13v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4ZM17 9h2a3 3 0 0 1 0 6h-2M2 22h18M8 5V2M13 5V2"/>',
+    air: '<path d="M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M4 16h5a3 3 0 1 1-3 3"/>',
+    health: '<path d="M20 5a5 5 0 0 0-8 1 5 5 0 0 0-8-1C-1 10 8 18 12 21c4-3 13-11 8-16Z"/><path d="M7 12h3l2-3 2 6 2-3h2"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+    fridge: '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 10h12M9 6v2M9 14v3"/>',
+    dishwasher: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 8h18M7 5h.01M10 5h.01"/><circle cx="12" cy="14" r="4"/>',
+    washer: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 8h18M7 5h.01M10 5h.01"/><circle cx="12" cy="14" r="4"/>',
+    phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+    laptop: '<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M2 20h20M8 20h8"/>',
+    headphones: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h3v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 1-2Zm16 0h-3v6h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-1-2Z"/>',
+    watch: '<rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6V2h6v4M9 18v4h6v-4M12 9v3l2 1"/>',
+    speaker: '<rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="15" r="4"/><circle cx="12" cy="7" r="1"/>',
+    tablet: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/>',
+    gamepad: '<path d="M8 8h8a6 6 0 0 1 5 7l-1 4a2 2 0 0 1-3 1l-3-2h-4l-3 2a2 2 0 0 1-3-1l-1-4a6 6 0 0 1 5-7Z"/><path d="M7 12v4M5 14h4M16 13h.01M18 15h.01"/>',
+    charger: '<path d="M8 3v5M16 3v5M7 8h10v4a5 5 0 0 1-5 5v4M9 21h6"/>'
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.grid}</svg>`;
+}
+
 function filteredProducts() {
   const query = state.search.toLocaleLowerCase("fa");
-  const groups = {
-    "لوازم خانگی": new Set(["لوازم خانگی", "یخچال", "ظرفشویی", "لباسشویی"]),
-    "کالای دیجیتال": new Set(["کالای دیجیتال", "موبایل", "لپ تاپ", "اکسسوری", "گجت", "گجت های خانگی", "اسپیکر", "تبلت", "کنسول بازی", "شارژر"]),
-    "گجت خانگی": new Set(["گجت خانگی", "لوازم خانگی ریز", "گجت", "گجت های خانگی"])
-  };
-  const items = state.products.filter(product => {
-    const categoryOk = state.category === "همه" || (groups[state.category] ? groups[state.category].has(product.category) : product.category === state.category);
+  const items = productsForCategory(state.category).filter(product => {
     const brandOk = !state.brands.size || state.brands.has(product.brand);
     const haystack = `${product.name} ${product.brand} ${product.code}`.toLocaleLowerCase("fa");
-    return categoryOk && brandOk && (!query || haystack.includes(query));
+    return brandOk && (!query || haystack.includes(query));
   });
   return items.sort((a,b) => {
     if (state.sort === "price-asc") return a.price - b.price;
@@ -269,13 +460,26 @@ function filteredProducts() {
 }
 
 function render() {
-  document.querySelectorAll(".category-card").forEach(button => { const group = CATEGORY_GROUPS.find(item => item.name === button.dataset.category); const isActive = button.dataset.category === state.category || Boolean(group?.children?.includes(state.category)); button.classList.toggle("active", isActive); if (group?.children?.length) button.setAttribute("aria-expanded", String(isActive)); });
-  document.querySelectorAll(".subcategory-chip").forEach(button => button.classList.toggle("active", button.dataset.category === state.category));
+  const path = categoryPath(state.category);
+  document.querySelectorAll(".category-card").forEach(button => {
+    const isActive = button.dataset.category === "همه" ? state.category === "همه" : path.some(node => node.id === button.dataset.category);
+    button.classList.toggle("active", isActive); button.setAttribute("aria-pressed", String(isActive));
+    if (button.hasAttribute("aria-controls")) button.setAttribute("aria-expanded", String(isActive));
+  });
+  document.querySelectorAll(".subcategory-card").forEach(button => {
+    const active = button.dataset.category === state.category;
+    button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active));
+  });
   document.querySelectorAll(".brand-option input").forEach(input => input.checked = state.brands.has(input.value));
   const products = filteredProducts();
   el.count.textContent = `${faNumber.format(products.length)} کالا`;
   el.grid.replaceChildren(...products.map(productCard));
   el.grid.hidden = !products.length; el.empty.hidden = !!products.length;
+  if (!products.length) {
+    const categoryEmpty = state.category !== "همه" && !productsForCategory(state.category).length;
+    el.empty.querySelector("h3").textContent = categoryEmpty ? "این بخش فعلاً کالای موجود ندارد" : "محصولی پیدا نشد";
+    el.empty.querySelector("p").textContent = categoryEmpty ? "می‌توانید از مسیر دسته‌بندی به بخش قبلی برگردید یا سایر محصولات را ببینید." : "فیلترها یا عبارت جستجو را تغییر دهید.";
+  }
   renderActiveFilters();
 }
 
@@ -321,12 +525,10 @@ function unlockPageAfterModal() {
 
 function openProductModal(product) {
   const modal = document.querySelector("#productModal");
-  const image = document.querySelector("#modalProductImage");
-  image.src = product.image || placeholder(product); image.alt = `تصویر ${product.name}`;
-  image.onerror = () => { image.src = placeholder(product); };
+  renderModalMedia(product);
   document.querySelector("#modalProductCategory").textContent = product.category || "X.Point";
   document.querySelector("#modalProductName").textContent = product.name;
-  document.querySelector("#modalProductDescription").textContent = product.description || `محصول ${product.brand} در دسته ${product.category || "محصولات دیجیتال"}.`;
+  renderProductDescription(product);
   document.querySelector("#modalProductBrand").textContent = product.brand;
   document.querySelector("#modalProductCode").textContent = product.code;
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
@@ -335,6 +537,77 @@ function openProductModal(product) {
   lockPageForModal();
   modal.hidden = false;
   document.querySelector("#modalClose").focus({ preventScroll: true });
+}
+
+function renderProductDescription(product) {
+  const container = document.querySelector("#modalProductDescription");
+  const fallback = `محصول ${product.brand} در دسته ${product.category || "محصولات دیجیتال"}.`;
+  const lines = normalize(product.description || fallback).split(/\n+/).map(line => line.trim()).filter(Boolean);
+  const list = document.createElement("ul");
+  const content = [];
+  for (const line of lines) {
+    if (/^[•\-–]\s*/.test(line)) {
+      const item = document.createElement("li"); item.textContent = line.replace(/^[•\-–]\s*/, ""); list.append(item);
+    } else {
+      const paragraph = document.createElement("p"); paragraph.textContent = line; content.push(paragraph);
+    }
+  }
+  container.replaceChildren(...content, ...(list.children.length ? [list] : []));
+}
+
+function renderModalMedia(product) {
+  const tabs = document.querySelector("#modalMediaTabs"), stage = document.querySelector("#modalMediaStage"), thumbnails = document.querySelector("#modalThumbnails");
+  const images = (product.images?.length ? product.images : [product.image]).filter(Boolean);
+  if (!images.length) images.push(placeholder(product));
+  tabs.replaceChildren(); stage.replaceChildren(); thumbnails.replaceChildren();
+
+  const activate = (button, render) => {
+    tabs.querySelectorAll("button").forEach(tab => { tab.classList.toggle("active", tab === button); tab.setAttribute("aria-selected", tab === button ? "true" : "false"); });
+    render();
+  };
+  const addTab = (label, icon, render) => {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "modal-media-tab"; button.setAttribute("role", "tab");
+    button.innerHTML = `<span aria-hidden="true">${icon}</span>${label}`;
+    button.addEventListener("click", () => activate(button, render)); tabs.append(button); return button;
+  };
+  const showImage = index => {
+    stage.replaceChildren();
+    const image = document.createElement("img"); image.src = images[index]; image.alt = `تصویر ${product.name}`;
+    image.addEventListener("error", () => { image.src = placeholder(product); }, { once: true }); stage.append(image);
+    const counter = document.createElement("span"); counter.className = "modal-media-counter"; counter.textContent = `${faNumber.format(index + 1)} / ${faNumber.format(images.length)}`; stage.append(counter);
+    if (images.length > 1) {
+      const previous = document.createElement("button"), next = document.createElement("button");
+      previous.type = next.type = "button"; previous.className = "modal-gallery-arrow is-previous"; next.className = "modal-gallery-arrow is-next";
+      previous.setAttribute("aria-label", "تصویر قبلی"); next.setAttribute("aria-label", "تصویر بعدی"); previous.textContent = "→"; next.textContent = "←";
+      previous.addEventListener("click", () => showImage((index - 1 + images.length) % images.length));
+      next.addEventListener("click", () => showImage((index + 1) % images.length)); stage.append(previous, next);
+    }
+    thumbnails.hidden = images.length < 2;
+    [...thumbnails.children].forEach((thumb, position) => { thumb.classList.toggle("active", position === index); thumb.setAttribute("aria-current", position === index ? "true" : "false"); });
+  };
+  images.forEach((source, index) => {
+    const button = document.createElement("button"), image = document.createElement("img");
+    button.type = "button"; button.className = "modal-thumbnail"; button.setAttribute("aria-label", `تصویر ${faNumber.format(index + 1)}`);
+    image.src = source; image.alt = ""; image.addEventListener("error", () => { image.src = placeholder(product); }, { once: true });
+    button.append(image); button.addEventListener("click", () => showImage(index)); thumbnails.append(button);
+  });
+  const imageTab = addTab(images.length > 1 ? `تصاویر (${faNumber.format(images.length)})` : "تصویر", "▧", () => showImage(0));
+
+  const showFrame = (url, title, isVideo = false) => {
+    stage.replaceChildren(); thumbnails.hidden = true;
+    if (isVideo && /\.(?:mp4|webm|ogg)(?:$|[?#])/i.test(url)) {
+      const video = document.createElement("video"); video.src = url; video.controls = true; video.playsInline = true; video.preload = "metadata"; video.poster = images[0]; video.setAttribute("aria-label", title); stage.append(video);
+    } else {
+      const frame = document.createElement("iframe"); frame.src = url; frame.title = title; frame.loading = "eager"; frame.allowFullscreen = true; frame.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"; stage.append(frame);
+    }
+    if (isVideo) {
+      const label = document.createElement("span"); label.className = "modal-stage-label"; label.innerHTML = '<b aria-hidden="true">▶</b>ویدئوی محصول'; stage.append(label);
+    }
+  };
+  if (product.video) addTab("ویدئو", "▶", () => showFrame(product.video, `ویدئوی ${product.name}`, true));
+  if (product.view360) addTab("نمای ۳۶۰°", "↻", () => showFrame(product.view360, `نمای ۳۶۰ درجه ${product.name}`));
+  activate(imageTab, () => showImage(0));
 }
 
 function closeProductModal() {
@@ -351,7 +624,7 @@ document.addEventListener("keydown", event => { if (event.key === "Escape") clos
 
 function renderActiveFilters() {
   const chips = [];
-  if (state.category !== "همه") chips.push(chip(state.category, () => { state.category = "همه"; render(); }));
+  if (state.category !== "همه") chips.push(chip(categoryPath(state.category).slice(1).map(node => node.label).join(" / "), () => selectCategory("همه")));
   state.brands.forEach(brand => chips.push(chip(brand, () => { state.brands.delete(brand); render(); })));
   if (state.search) chips.push(chip(`جستجو: ${state.search}`, () => { state.search = ""; el.search.value = ""; render(); }));
   el.active.replaceChildren(...chips);
@@ -363,10 +636,23 @@ function chip(label, remove) {
   text.textContent = label; close.type = "button"; close.textContent = "×"; close.setAttribute("aria-label", `حذف فیلتر ${label}`); close.addEventListener("click", remove); node.append(text,close); return node;
 }
 
-function resetAll() { state.category = "همه"; state.brands.clear(); state.search = ""; state.sort = "featured"; el.search.value = ""; el.sort.value = "featured"; render(); }
+function resetAll() { state.brands.clear(); state.search = ""; state.sort = "featured"; el.search.value = ""; el.sort.value = "featured"; selectCategory("همه"); }
 
 let searchTimer;
-el.search.addEventListener("input", event => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { state.search = normalize(event.target.value); render(); }, 180); });
+el.search.addEventListener("input", event => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const query = normalize(event.target.value);
+    state.search = query;
+    if (query) {
+      state.category = "همه";
+      state.brands.clear();
+      renderSubcategories();
+      buildBrandFilters();
+    }
+    render();
+  }, 180);
+});
 el.sort.addEventListener("change", event => { state.sort = event.target.value; render(); });
 el.clear.addEventListener("click", resetAll); el.emptyReset.addEventListener("click", resetAll);
 document.querySelectorAll("[data-scroll-products]").forEach(button => button.addEventListener("click", () => document.querySelector("#products").scrollIntoView({ behavior: "smooth" })));

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f26322" />
   <meta name="description" content="کاتالوگ به‌روز محصولات X.Point با فیلتر دسته‌بندی و برند" />
   <title>X.Point | انتخاب درست، ساده‌تر</title>
-  <link rel="stylesheet" href="styles.css?v=20260818-3" />
+  <link rel="stylesheet" href="styles.css?v=20260906-3" />
 </head>
 <body>
   <a class="skip-link" href="#products">رفتن به محصولات</a>
@@ -54,8 +54,8 @@
           <h2 id="category-title">دنبال چه چیزی هستید؟</h2>
         </div>
       </div>
-      <div class="category-rail" id="categoryRail" role="list"></div>
-      <div class="subcategory-rail" id="subcategoryRail" role="list" aria-live="polite" hidden></div>
+      <div class="category-rail" id="categoryRail" role="group" aria-label="دسته‌های اصلی"></div>
+      <div class="subcategory-rail" id="subcategoryRail" role="region" aria-label="زیرمجموعه‌ها" hidden></div>
     </div>
     </section>
 
@@ -65,8 +65,8 @@
           <details class="brand-filter-details">
             <summary class="brand-filter-toggle">
               <span class="brand-filter-title">
-                <span class="filter-kicker">فیلتر دقیق</span>
-                <span class="brand-filter-name">برندها</span>
+                <span class="filter-kicker" id="brandFilterContext">برای همه محصولات</span>
+                <span class="brand-filter-name">برندهای مرتبط</span>
               </span>
               <span class="filter-chevron" aria-hidden="true">⌄</span>
             </summary>
@@ -148,11 +148,20 @@
   <div class="product-modal-layer" id="productModal" hidden>
     <section class="product-modal" role="dialog" aria-modal="true" aria-labelledby="modalProductName" tabindex="-1">
       <button class="modal-close" id="modalClose" type="button" aria-label="بستن">×</button>
-      <div class="modal-media"><img id="modalProductImage" alt="" /></div>
+      <div class="modal-gallery">
+        <div class="modal-media-tabs" id="modalMediaTabs" role="tablist" aria-label="رسانه‌های محصول"></div>
+        <div class="modal-media-stage" id="modalMediaStage"></div>
+        <div class="modal-thumbnails" id="modalThumbnails" aria-label="تصاویر محصول"></div>
+      </div>
       <div class="modal-copy">
-        <span class="modal-category" id="modalProductCategory"></span>
-        <h2 id="modalProductName"></h2>
-        <p class="modal-description" id="modalProductDescription"></p>
+        <div class="modal-heading">
+          <span class="modal-category" id="modalProductCategory"></span>
+          <h2 id="modalProductName"></h2>
+        </div>
+        <section class="modal-description-section" aria-labelledby="modalDescriptionTitle">
+          <h3 id="modalDescriptionTitle">توضیحات محصول</h3>
+          <div class="modal-description" id="modalProductDescription"></div>
+        </section>
         <dl class="modal-details">
           <div><dt>برند</dt><dd id="modalProductBrand"></dd></div>
           <div><dt>کد محصول</dt><dd id="modalProductCode"></dd></div>
@@ -164,6 +173,7 @@
   </div>
 
   <script src="config.js?v=20260816-1"></script>
-  <script src="app.js?v=20260818-4"></script>
+  <script src="category-tree.js?v=20260906-3"></script>
+  <script src="app.js?v=20260906-3"></script>
 </body>
 </html>
