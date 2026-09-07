@@ -147,7 +147,11 @@ function applyMediaEnhancements(products) {
   const speaker = products.find(item => item.code === "1001619");
   if (speaker) {
     speaker.image = "assets/jbl-partybox-520-01.webp";
-    speaker.images = Array.from({ length: 12 }, (_, index) => `assets/jbl-partybox-520-${String(index + 1).padStart(2, "0")}.webp`);
+    speaker.images = [
+      ...Array.from({ length: 12 }, (_, index) => `assets/jbl-partybox-520-${String(index + 1).padStart(2, "0")}.webp`),
+      "assets/jbl-partybox-520-v2-front.png",
+      "assets/jbl-partybox-520-v2-rear.png"
+    ];
     speaker.video = "assets/jbl-partybox-520.webm";
     speaker.view360 = "assets/jbl-partybox-520-glb.html";
     speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
