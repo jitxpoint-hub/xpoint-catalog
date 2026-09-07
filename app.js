@@ -80,8 +80,8 @@ function normalizeMediaUrl(value) {
 }
 
 function normalizeProduct(row, index) {
-  const image = pick(row, ["image", "imageurl", "image_url", "photo", "عکس", "تصویر", "لینک عکس", "آدرس تصویر"]);
-  const listedImages = splitMediaList(pick(row, ["images", "gallery", "تصاویر", "تصاویر بیشتر", "عکس‌های بیشتر", "عکس های بیشتر"]));
+  const image = pick(row, ["image", "imageurl", "image_url", "photo", "عکس", "تصویر", "عکس اصلی", "تصویر اصلی", "لینک عکس", "آدرس تصویر"]);
+  const listedImages = splitMediaList(pick(row, ["images", "gallery", "تصاویر", "تصاویر بیشتر", "عکس‌های بیشتر", "عکس های بیشتر", "گالری عکس", "لینک گالری"]));
   const extraImages = [1, 2, 3, 4, 5, 6].map(number => pick(row, [`image${number}`, `image_${number}`, `عکس ${number}`, `تصویر ${number}`]));
   const images = [image, ...listedImages, ...extraImages].map(driveImageUrl).filter((url, position, all) => url && all.indexOf(url) === position);
   const product = {
@@ -96,8 +96,8 @@ function normalizeProduct(row, index) {
     description: pick(row, ["description", "desc", "توضیحات", "شرح"]),
     image: images[0] || "",
     images,
-    video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "لینک ویدئو", "لینک ویدیو"])),
-    view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "نمای ۳۶۰", "نمای 360", "مدل سه بعدی", "لینک سه بعدی"])),
+    video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "ویدئوی محصول", "ویدیوی محصول", "لینک ویدئو", "لینک ویدیو"])),
+    view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "مدل", "مدل سه بعدی", "مدل سه‌بعدی", "لینک مدل", "لینک مدل سه بعدی", "لینک مدل سه‌بعدی", "لینک سه بعدی", "نمای ۳۶۰", "نمای 360"])),
     // قیمت، منبع اصلی وضعیت موجودی است: محصول دارای قیمت همیشه موجود است.
     stock: "موجود"
   };
@@ -146,15 +146,16 @@ function applyMediaEnhancements(products) {
 
   const speaker = products.find(item => item.code === "1001619");
   if (speaker) {
-    speaker.image = "assets/jbl-partybox-520-01.webp";
-    speaker.images = [
+    const defaultImages = [
       ...Array.from({ length: 12 }, (_, index) => `assets/jbl-partybox-520-${String(index + 1).padStart(2, "0")}.webp`),
       "assets/jbl-partybox-520-v2-front.png",
       "assets/jbl-partybox-520-v2-rear.png"
     ];
-    speaker.video = "assets/jbl-partybox-520.webm";
-    speaker.view360 = "assets/jbl-partybox-520-glb.html";
-    speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
+    if (!speaker.image) speaker.image = defaultImages[0];
+    if (!speaker.images?.length || speaker.images.length === 1) speaker.images = [speaker.image, ...defaultImages.filter(url => url !== speaker.image)];
+    if (!speaker.video) speaker.video = "assets/jbl-partybox-520.webm";
+    if (!speaker.view360) speaker.view360 = "assets/jbl-partybox-520-glb.html";
+    if (!speaker.description) speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
   }
 }
 
