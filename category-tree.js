@@ -88,7 +88,13 @@ const fridgeRules = [
     for (const group of groups.filter(group => group.name !== 'همه')) {
       const members = new Set(categoryProducts(group.name, catalog));
       add(group.name, group.name, 'همه', p => members.has(p));
-      const bases = group.children.length ? group.children : [group.name];
+      // دسته‌های سطح دوم از خود شیت می‌آیند. فهرست ثابت فقط ترتیب اولیه را حفظ می‌کند.
+      const sheetBases = [...new Set([...members].map(product => clean(product.category)).filter(Boolean))];
+      const bases = [...group.children.filter(base => sheetBases.some(value => key(value) === key(base)))];
+      for (const base of sheetBases) {
+        if (!bases.some(value => key(value) === key(base))) bases.push(base);
+      }
+      if (!bases.length) bases.push(group.name);
       for (const base of bases) {
         if (base !== group.name) add(base, base, group.name, p => members.has(p) && p.category === base);
         // These categories open their products directly; capacity is product detail,

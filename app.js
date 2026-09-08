@@ -91,8 +91,8 @@ function normalizeProduct(row, index) {
     code: pick(row, ["code", "sku", "productcode", "product_code", "کد", "کد محصول"]),
     price: parsePrice(pick(row, ["price", "cashprice", "cash_price", "قیمت", "قیمت نقد"])),
     category: canonicalCategory(pick(row, ["category", "دسته", "دسته بندی", "دسته‌بندی"])),
-    group: pick(row, ["group", "گروه اصلی"]),
-    subcategory: pick(row, ["subcategory", "زیرمجموعه", "زیر دسته", "زیر‌دسته", "زیر دسته‌بندی"]),
+    group: canonicalCategory(pick(row, ["group", "گروه اصلی"])),
+    subcategory: normalize(pick(row, ["subcategory", "زیرمجموعه", "زیر دسته", "زیر‌دسته", "زیر دسته‌بندی"])),
     description: pick(row, ["description", "desc", "توضیحات", "شرح"]),
     image: images[0] || "",
     images,
@@ -127,7 +127,9 @@ function applyMediaEnhancements(products) {
     };
     products.unshift(product);
   }
-  if (product) {
+  // دارایی محلی فقط برای داده‌های قدیمیِ فاقد هرگونه رسانه استفاده می‌شود.
+  // در حالت عادی عکس، ویدئو و مدل مستقیماً از شیت خوانده می‌شوند.
+  if (product && !product.images?.length && !product.video && !product.view360) {
     product.image = "assets/iphone-17-mist-blue-01.webp";
     product.images = [
       "assets/iphone-17-mist-blue-01.webp",
@@ -145,7 +147,7 @@ function applyMediaEnhancements(products) {
   }
 
   const speaker = products.find(item => item.code === "1001619");
-  if (speaker) {
+  if (speaker && !speaker.images?.length && !speaker.video && !speaker.view360) {
     const mainPhoto = "https://drive.google.com/file/d/10BIP0fYBZIiQ2Xfj7Xoh3EVkqci7kp_e/view?usp=drive_link";
     const galleryPhotos = [
       "https://drive.google.com/open?id=13BO0iE7WizilDm3kHJ9JeyJpKUbsV4G1&usp=drive_copy",
@@ -405,6 +407,11 @@ function categorySetFor(selection) {
 }
 
 function baseProductsForCategory(selection, source = state.products) {
+  const selectedGroup = canonicalCategory(selection);
+  const hasSheetGroup = source.some(product => canonicalCategory(product.group) === selectedGroup);
+  if (hasSheetGroup) {
+    return source.filter(product => canonicalCategory(product.group) === selectedGroup);
+  }
   const categories = categorySetFor(selection);
   return categories ? source.filter(product => categories.has(product.category)) : [...source];
 }
@@ -666,6 +673,6 @@ bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1))
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
 
 buildCategories(); loadProducts(); loadDriveBanners();
-// همگام‌سازی خودکار فهرست محصولات هر ۴ ساعت، حتی وقتی صفحه باز بماند.
-setInterval(loadProducts, 4 * 60 * 60 * 1000);
+// شیت هنگام بازشدن صفحه و سپس هر پنج دقیقه بدون کش دوباره خوانده می‌شود.
+setInterval(loadProducts, 5 * 60 * 1000);
 bannerState.refreshTimer = setInterval(loadDriveBanners, Number(window.XPOINT_CONFIG?.bannerRefreshMs) || 300000);
