@@ -40,6 +40,13 @@ const normalize = value => String(value ?? "").trim();
 const digitsToEnglish = value => normalize(value).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 const parsePrice = value => Number(digitsToEnglish(value).replace(/[^\d.]/g, "")) || 0;
 
+function normalizeStock(value, price) {
+  const stock = normalize(value).replace(/\s+/g, " ");
+  if (stock === "موجود" || stock === "ناموجود" || stock === "عدم نمایش") return stock;
+  // سازگاری با شیت‌های قدیمی: تا زمانی که ستون وضعیت اضافه نشده، قیمت رفتار قبلی را حفظ می‌کند.
+  return price > 0 ? "موجود" : "عدم نمایش";
+}
+
 function parseCsv(text) {
   const rows = []; let row = []; let cell = ""; let quoted = false;
   for (let i = 0; i < text.length; i++) {
@@ -84,12 +91,13 @@ function normalizeProduct(row, index) {
   const listedImages = splitMediaList(pick(row, ["images", "gallery", "تصاویر", "تصاویر بیشتر", "عکس‌های بیشتر", "عکس های بیشتر", "گالری عکس", "لینک گالری"]));
   const extraImages = [1, 2, 3, 4, 5, 6].map(number => pick(row, [`image${number}`, `image_${number}`, `عکس ${number}`, `تصویر ${number}`]));
   const images = [image, ...listedImages, ...extraImages].map(driveImageUrl).filter((url, position, all) => url && all.indexOf(url) === position);
+  const price = parsePrice(pick(row, ["price", "cashprice", "cash_price", "قیمت", "قیمت نقد"]));
   const product = {
     id: pick(row, ["id", "ردیف"]) || String(index + 1),
     name: pick(row, ["name", "product", "productname", "product_name", "نام", "نام محصول"]),
     brand: pick(row, ["brand", "برند"]),
     code: pick(row, ["code", "sku", "productcode", "product_code", "کد", "کد محصول"]),
-    price: parsePrice(pick(row, ["price", "cashprice", "cash_price", "قیمت", "قیمت نقد"])),
+    price,
     category: canonicalCategory(pick(row, ["category", "دسته", "دسته بندی", "دسته‌بندی"])),
     group: canonicalCategory(pick(row, ["group", "گروه اصلی"])),
     subcategory: normalize(pick(row, ["subcategory", "زیرمجموعه", "زیر دسته", "زیر‌دسته", "زیر دسته‌بندی"])),
@@ -98,8 +106,7 @@ function normalizeProduct(row, index) {
     images,
     video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "ویدئوی محصول", "ویدیوی محصول", "لینک ویدئو", "لینک ویدیو"])),
     view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "مدل", "مدل سه بعدی", "مدل سه‌بعدی", "لینک مدل", "لینک مدل سه بعدی", "لینک مدل سه‌بعدی", "لینک سه بعدی", "نمای ۳۶۰", "نمای 360"])),
-    // قیمت، منبع اصلی وضعیت موجودی است: محصول دارای قیمت همیشه موجود است.
-    stock: "موجود"
+    stock: normalizeStock(pick(row, ["stock", "availability", "وضعیت موجودی", "موجودی", "وضعیت"]), price)
   };
   if (product.category === "یخچال و فریزر") {
     product.category = /لباسشویی/.test(`${product.name} ${product.group}`) ? "لباسشویی" : "یخچال";
@@ -208,9 +215,9 @@ async function loadProducts() {
       if (!response.ok) throw new Error("فایل داده نمونه در دسترس نیست");
       raw = await response.json();
     }
-    // ردیف‌های بدون قیمت یا با قیمت صفر، به‌طور کامل از سایت حذف می‌شوند.
+    // قیمت فقط برای نمایش مبلغ است؛ نمایش محصول فقط با «وضعیت موجودی» کنترل می‌شود.
     state.catalog = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
-    state.products = state.catalog.filter(p => p.price > 0);
+    state.products = state.catalog.filter(p => p.stock !== "عدم نمایش");
     applyMediaEnhancements(state.products);
     buildCategories(); buildBrandFilters(); render();
   } catch (error) {
@@ -219,7 +226,7 @@ async function loadProducts() {
       if (!fallbackResponse.ok) throw error;
       const fallbackRaw = await fallbackResponse.json();
       state.catalog = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
-      state.products = state.catalog.filter(p => p.price > 0);
+      state.products = state.catalog.filter(p => p.stock !== "عدم نمایش");
       applyMediaEnhancements(state.products);
       buildCategories(); buildBrandFilters(); render();
       el.error.hidden = true;
@@ -465,8 +472,8 @@ function filteredProducts() {
     return brandOk && (!query || haystack.includes(query));
   });
   return items.sort((a,b) => {
-    if (state.sort === "price-asc") return a.price - b.price;
-    if (state.sort === "price-desc") return b.price - a.price;
+    if (state.sort === "price-asc") return (a.price || Number.POSITIVE_INFINITY) - (b.price || Number.POSITIVE_INFINITY);
+    if (state.sort === "price-desc") return (b.price || Number.NEGATIVE_INFINITY) - (a.price || Number.NEGATIVE_INFINITY);
     if (state.sort === "name") return a.name.localeCompare(b.name,"fa");
     return Number(a.id) - Number(b.id);
   });
