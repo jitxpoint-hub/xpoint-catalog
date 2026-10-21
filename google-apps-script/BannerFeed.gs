@@ -112,7 +112,8 @@ function analyticsStatsOutput_(params, callback) {
   const threshold = analyticsThreshold_(range);
   const summary = { visits: 0, sessions: 0, productViews: 0, searches: 0, engagementRate: 0 };
   const sessions = {}, engagedSessions = {};
-  const products = {}, sections = {}, groups = {}, categories = {}, categoryPaths = {}, sources = {}, devices = {}, searches = {};
+  const products = {}, sections = {}, groups = {}, categories = {}, categoryPaths = {}, sources = {}, devices = {}, searches = {}, dailyActivity = {};
+  const recentActivity = [];
 
   rows.forEach(function(row) {
     const time = row[0] instanceof Date ? row[0] : new Date(row[0]);
@@ -121,8 +122,14 @@ function analyticsStatsOutput_(params, callback) {
     const session = String(row[2] || "");
     const group = String(row[5] || "").trim();
     const category = String(row[6] || "").trim();
+    const meaningfulEvent = ["product_view", "category_select", "search", "festival_click"].indexOf(eventName) >= 0;
     if (session) sessions[session] = true;
-    if (session && ["product_view", "category_select", "search", "festival_click"].indexOf(eventName) >= 0) engagedSessions[session] = true;
+    if (session && meaningfulEvent) engagedSessions[session] = true;
+    if (meaningfulEvent && time && !isNaN(time.getTime())) {
+      const dayKey = Utilities.formatDate(time, Session.getScriptTimeZone() || "Asia/Tehran", "yyyy-MM-dd");
+      increment_(dailyActivity, dayKey);
+      recentActivity.push(recentActivityItem_(eventName, row, time, group, category));
+    }
     if (eventName === "page_view") {
       summary.visits++;
       increment_(sources, String(row[10] || row[9] || "مستقیم"));
@@ -161,10 +168,22 @@ function analyticsStatsOutput_(params, callback) {
     sources: ranked_(sources),
     devices: ranked_(devices),
     searches: ranked_(searches),
+    dailyActivity: Object.keys(dailyActivity).sort().map(function(label) { return { label: label.slice(5).replace("-", "/"), value: dailyActivity[label] }; }),
+    recentActivity: recentActivity.sort(function(a, b) { return b.sortTime - a.sortTime; }).slice(0, 12).map(function(item) { delete item.sortTime; return item; }),
     generatedAt: new Date().toISOString()
   };
   cache.put(cacheKey, JSON.stringify(result), 60);
   return jsonOutput_(result, callback);
+}
+
+function recentActivityItem_(eventName, row, time, group, category) {
+  const actions = { product_view: "مشاهده محصول", category_select: "انتخاب دسته", search: "جستجو", festival_click: "جشنواره" };
+  let title = "فعالیت در کاتالوگ";
+  if (eventName === "product_view") title = String(row[3] || row[4] || "محصول بدون نام");
+  else if (eventName === "category_select") title = category || group || "دسته‌بندی";
+  else if (eventName === "search") title = String(row[8] || "عبارت بدون نام");
+  else if (eventName === "festival_click") title = String(row[7] || "جشنواره");
+  return { action: actions[eventName] || "فعالیت", title: title, detail: [group, category].filter(Boolean).filter(function(value, index, list) { return list.indexOf(value) === index; }).join(" / "), time: time.toISOString(), sortTime: time.getTime() };
 }
 
 function festivalOutput_(callback) {

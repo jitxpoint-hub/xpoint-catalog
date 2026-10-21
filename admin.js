@@ -1,5 +1,6 @@
 const dashboard = { range: "30d", timer: null };
 const faNumberAdmin = new Intl.NumberFormat("fa-IR");
+const faDateAdmin = new Intl.DateTimeFormat("fa-IR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 function requestStats(range) {
   const endpoint = String(window.XPOINT_CONFIG?.analyticsEndpoint || "").trim();
@@ -28,6 +29,28 @@ function renderRankList(id, items = [], emptyText = "هنوز داده کافی 
   }));
 }
 
+function renderDailyActivity(items = []) {
+  const container = document.getElementById("dailyActivity");
+  if (!items.length) { const empty = document.createElement("p"); empty.className = "rank-empty"; empty.textContent = "هنوز فعالیتی برای این بازه ثبت نشده است."; container.replaceChildren(empty); return; }
+  const max = Math.max(...items.map(item => Number(item.value) || 0), 1);
+  container.replaceChildren(...items.slice(-14).map(item => {
+    const row = document.createElement("div"), label = document.createElement("span"), bar = document.createElement("span"), fill = document.createElement("i"), value = document.createElement("strong");
+    row.className = "activity-day"; label.textContent = item.label; bar.className = "activity-bar"; fill.style.setProperty("--value", `${Math.max(4, (Number(item.value) || 0) / max * 100)}%`); value.textContent = faNumberAdmin.format(item.value || 0);
+    bar.append(fill); row.append(label, bar, value); return row;
+  }));
+}
+
+function renderRecentActivity(items = []) {
+  const container = document.getElementById("recentActivity");
+  if (!items.length) { const empty = document.createElement("p"); empty.className = "rank-empty"; empty.textContent = "هنوز فعالیت تازه‌ای ثبت نشده است."; container.replaceChildren(empty); return; }
+  container.replaceChildren(...items.slice(0, 8).map(item => {
+    const row = document.createElement("div"), badge = document.createElement("span"), content = document.createElement("div"), title = document.createElement("strong"), meta = document.createElement("small"), time = document.createElement("time");
+    row.className = "recent-item"; badge.className = "recent-badge"; badge.textContent = item.action || "فعالیت"; title.textContent = item.title || "بدون عنوان";
+    meta.textContent = item.detail || "کاتالوگ"; time.dateTime = item.time || ""; time.textContent = item.time ? faDateAdmin.format(new Date(item.time)) : "—";
+    content.append(title, meta); row.append(badge, content, time); return row;
+  }));
+}
+
 function renderDashboard(data) {
   document.getElementById("metricVisits").textContent = faNumberAdmin.format(data.summary.visits || 0);
   document.getElementById("metricProducts").textContent = faNumberAdmin.format(data.summary.productViews || 0);
@@ -39,6 +62,7 @@ function renderDashboard(data) {
   renderRankList("topCategoryPaths", data.categoryPaths, "پس از مشاهده محصول، مسیر گروه و دسته اینجا نمایش داده می‌شود.");
   renderRankList("topSources", data.sources);
   renderRankList("topDevices", data.devices); renderRankList("topSearches", data.searches);
+  renderDailyActivity(data.dailyActivity); renderRecentActivity(data.recentActivity);
   const topProduct = data.products?.[0]?.label;
   const topGroup = data.groups?.[0]?.label;
   const headline = document.getElementById("insightHeadline");

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101113" />
   <meta name="robots" content="noindex,nofollow" />
   <title>گزارش استفاده | X.Point</title>
-  <link rel="stylesheet" href="admin.css?v=20261021-3" />
+  <link rel="stylesheet" href="admin.css?v=20261021-4" />
 </head>
 <body>
   <header class="admin-header">
@@ -44,6 +44,17 @@
       <p id="insightDetails">پس از دریافت گزارش، پربازدیدترین محصول و گروه اینجا نمایش داده می‌شود.</p>
     </section>
 
+    <section class="detail-grid" aria-label="جزئیات فعالیت کاربران">
+      <article class="report-card">
+        <header><h2>روند فعالیت روزانه</h2><span>انتخاب محصول، دسته یا جستجو</span></header>
+        <div class="activity-chart" id="dailyActivity"></div>
+      </article>
+      <article class="report-card">
+        <header><h2>آخرین فعالیت‌ها</h2><span>بدون اطلاعات شخصی</span></header>
+        <div class="recent-list" id="recentActivity"></div>
+      </article>
+    </section>
+
     <section class="dashboard-grid">
       <article class="report-card report-wide"><header><h2>محصولات پربازدید</h2><span>بازشدن جزئیات</span></header><div class="rank-list" id="topProducts"></div></article>
       <article class="report-card"><header><h2>گروه‌های اصلی محبوب</h2><span>مثل لوازم خانگی</span></header><div class="rank-list" id="topGroups"></div></article>
@@ -56,6 +67,6 @@
   </main>
 
   <script src="config.js?v=20261021-2"></script>
-  <script src="admin.js?v=20261021-3"></script>
+  <script src="admin.js?v=20261021-4"></script>
 </body>
 </html>
