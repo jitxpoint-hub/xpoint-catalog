@@ -1,0 +1,57 @@
+name: Test and deploy catalog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: node --check app.js && node --check category-tree.js && node --check config.js
+
+      - name: Validate catalog data and smart refresh
+        run: node scripts/validate-catalog.mjs
+
+      - name: Verify required website files
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s category-tree.js && test -s config.js
+
+      - name: Prepare GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: test
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy tested catalog
+        id: deployment
+        uses: actions/deploy-pages@v4

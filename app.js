@@ -200,7 +200,12 @@ function placeholder(product) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+let productsLoadInFlight = false;
+let lastProductsRefreshAt = 0;
+
 async function loadProducts() {
+  if (productsLoadInFlight) return;
+  productsLoadInFlight = true;
   el.loading.hidden = false; el.error.hidden = true;
   const config = window.XPOINT_CONFIG || {};
   try {
@@ -234,7 +239,11 @@ async function loadProducts() {
       el.error.hidden = false;
       el.error.textContent = `دریافت فهرست محصولات انجام نشد. تنظیمات منبع داده را بررسی کنید. (${error.message})`;
     }
-  } finally { el.loading.hidden = true; }
+  } finally {
+    productsLoadInFlight = false;
+    lastProductsRefreshAt = Date.now();
+    el.loading.hidden = true;
+  }
 }
 
 async function loadDriveBanners() {
@@ -680,6 +689,13 @@ bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1))
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
 
 buildCategories(); loadProducts(); loadDriveBanners();
-// شیت هنگام بازشدن صفحه و سپس هر پنج دقیقه بدون کش دوباره خوانده می‌شود.
-setInterval(loadProducts, 5 * 60 * 1000);
+// شیت فقط وقتی صفحه فعال است تازه‌سازی می‌شود؛ پس از بازگشت کاربر نیز دادهٔ قدیمی فوراً به‌روز می‌شود.
+const PRODUCTS_REFRESH_MS = 5 * 60 * 1000;
+setInterval(() => {
+  if (!document.hidden) loadProducts();
+}, PRODUCTS_REFRESH_MS);
+document.addEventListener("visibilitychange", () => {
+  const dataIsStale = Date.now() - lastProductsRefreshAt >= PRODUCTS_REFRESH_MS;
+  if (!document.hidden && dataIsStale) loadProducts();
+});
 bannerState.refreshTimer = setInterval(loadDriveBanners, Number(window.XPOINT_CONFIG?.bannerRefreshMs) || 300000);
