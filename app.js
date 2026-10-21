@@ -19,6 +19,8 @@ const SUBCATEGORY_ICONS = {
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
 const RECENT_PRODUCTS_KEY = "xpoint-recent-products-v1";
 const RECENT_PRODUCTS_LIMIT = 8;
+const ANALYTICS_SESSION_KEY = "xpoint-analytics-session-v1";
+const analyticsState = { sessionId: "", seenSections: new Set(), lastSearch: "" };
 let categoryNodes = new Map();
 const bannerState = { items: [], index: 0, rotationTimer: null, refreshTimer: null };
 const el = {
@@ -78,6 +80,61 @@ function splitMediaList(value) {
 
 function splitManagementTags(value) {
   return [...new Set(normalize(value).split(/[|،,\n]+/).map(item => item.trim()).filter(Boolean))].slice(0, 4);
+}
+
+function analyticsValue(value, maxLength = 160) {
+  return normalize(value).replace(/[\u0000-\u001f]+/g, " ").slice(0, maxLength);
+}
+
+function analyticsSessionId() {
+  if (analyticsState.sessionId) return analyticsState.sessionId;
+  try {
+    const stored = sessionStorage.getItem(ANALYTICS_SESSION_KEY);
+    if (stored) return (analyticsState.sessionId = stored);
+    const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessionStorage.setItem(ANALYTICS_SESSION_KEY, id);
+    return (analyticsState.sessionId = id);
+  } catch (_) {
+    return (analyticsState.sessionId = `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  }
+}
+
+function analyticsContext() {
+  const url = new URL(window.location.href);
+  let source = "مستقیم";
+  try { source = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, "") : "مستقیم"; } catch (_) { /* آدرس نامعتبر */ }
+  return {
+    session: analyticsSessionId(), source,
+    utmSource: url.searchParams.get("utm_source") || "",
+    utmMedium: url.searchParams.get("utm_medium") || "",
+    utmCampaign: url.searchParams.get("utm_campaign") || "",
+    device: window.matchMedia("(max-width: 650px)").matches ? "موبایل" : window.matchMedia("(max-width: 1024px)").matches ? "تبلت" : "دسکتاپ",
+    path: `${url.pathname}${url.hash}`
+  };
+}
+
+function trackAnalyticsEvent(eventName, details = {}) {
+  const endpoint = normalize(window.XPOINT_CONFIG?.analyticsEndpoint);
+  if (!endpoint || navigator.webdriver) return;
+  const payload = { action: "track", event: eventName, ...analyticsContext(), ...details };
+  const params = new URLSearchParams();
+  Object.entries(payload).forEach(([key, value]) => {
+    const clean = analyticsValue(value, key === "product" || key === "query" ? 200 : 120);
+    if (clean) params.set(key, clean);
+  });
+  fetch(`${endpoint}${endpoint.includes("?") ? "&" : "?"}${params}`, { mode: "no-cors", cache: "no-store", keepalive: true }).catch(() => {});
+}
+
+function initUsageAnalytics() {
+  trackAnalyticsEvent("page_view");
+  if (!("IntersectionObserver" in window)) return;
+  const labels = { hero: "معرفی", categories: "دسته‌بندی‌ها", products: "محصولات", recentlyViewedSection: "اخیراً دیده‌شده", guide: "راهنمای خرید" };
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting || analyticsState.seenSections.has(entry.target.id)) return;
+    analyticsState.seenSections.add(entry.target.id);
+    trackAnalyticsEvent("section_view", { section: labels[entry.target.id] || entry.target.id });
+  }), { threshold: .35 });
+  Object.keys(labels).forEach(id => { const node = document.getElementById(id); if (node) observer.observe(node); });
 }
 
 function normalizeMediaUrl(value) {
@@ -285,6 +342,41 @@ function requestBannerFeed_(feedUrl) {
   });
 }
 
+function requestJsonp_(feedUrl, params = {}, prefix = "Feed") {
+  return new Promise((resolve, reject) => {
+    const callbackName = `__xpoint${prefix}_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    const script = document.createElement("script");
+    const cleanup = () => { delete window[callbackName]; script.remove(); clearTimeout(timeout); };
+    const timeout = setTimeout(() => { cleanup(); reject(new Error("زمان دریافت اطلاعات تمام شد")); }, 12000);
+    window[callbackName] = payload => { cleanup(); resolve(payload); };
+    script.onerror = () => { cleanup(); reject(new Error("ارتباط با سرویس برقرار نشد")); };
+    const query = new URLSearchParams({ ...params, callback: callbackName, _: String(Date.now()) });
+    script.src = `${feedUrl}${feedUrl.includes("?") ? "&" : "?"}${query}`;
+    document.head.append(script);
+  });
+}
+
+async function loadFestival() {
+  const endpoint = normalize(window.XPOINT_CONFIG?.analyticsEndpoint);
+  const root = document.querySelector("#festivalStrip");
+  if (!endpoint || !root) return;
+  try {
+    const payload = await requestJsonp_(endpoint, { action: "festival" }, "Festival");
+    const festival = payload?.festival;
+    if (!payload?.ok || !festival?.active) { root.hidden = true; return; }
+    document.querySelector("#festivalTitle").textContent = festival.title || "جشنواره X.Point";
+    document.querySelector("#festivalDescription").textContent = festival.description || "پیشنهادهای ویژه را ببینید.";
+    const link = document.querySelector("#festivalLink");
+    link.firstChild.textContent = `${festival.buttonText || "مشاهده جشنواره"} `;
+    link.href = festival.url || "#products";
+    link.onclick = () => trackAnalyticsEvent("festival_click", { section: festival.title || "جشنواره" });
+    root.hidden = false;
+  } catch (error) {
+    root.hidden = true;
+    console.warn("X.Point festival:", error.message);
+  }
+}
+
 function renderDriveBanners() {
   clearInterval(bannerState.rotationTimer);
   if (!bannerState.items.length) { bannerEl.root.hidden = true; return; }
@@ -331,6 +423,7 @@ function buildCategories() {
     visual.append(image, shade); content.append(number, title, description, count, action); button.append(visual, content);
     if (hasChildren) button.setAttribute("aria-controls", "subcategoryRail");
     button.addEventListener("click", () => {
+      trackAnalyticsEvent("category_select", { category: category.name, section: "دسته‌بندی‌ها" });
       selectCategory(category.name);
       scrollCategorySelection();
     });
@@ -387,6 +480,7 @@ function renderSubcategories() {
     if (hasChildren) { button.setAttribute("aria-controls", "subcategoryRail"); button.setAttribute("aria-expanded", "false"); }
     arrow.textContent = "←"; arrow.setAttribute("aria-hidden", "true"); button.append(icon, copy, arrow);
     button.addEventListener("click", () => {
+      trackAnalyticsEvent("category_select", { category: node.label, group: group.label, section: "زیرمجموعه‌ها" });
       selectCategory(name);
       if (hasChildren) { document.querySelector("#subcategoryTitle")?.focus({ preventScroll: true }); scrollCategorySelection(); }
       else document.querySelector("#products").scrollIntoView({ behavior: scrollBehavior(), block: "start" });
@@ -572,6 +666,7 @@ function openProductModal(product) {
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
   document.querySelector("#modalProductPrice").innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : "تماس بگیرید";
   renderRelatedProducts(product);
+  trackAnalyticsEvent("product_view", { product: product.name, code: product.code, group: product.group, category: product.category, section: "جزئیات محصول" });
   rememberRecentProduct(product.code);
   renderRecentlyViewed();
   if (modal.hidden) modalTrigger = document.activeElement;
@@ -758,6 +853,10 @@ el.search.addEventListener("input", event => {
   searchTimer = setTimeout(() => {
     const query = normalize(event.target.value);
     state.search = query;
+    if (query.length >= 2 && query !== analyticsState.lastSearch) {
+      analyticsState.lastSearch = query;
+      trackAnalyticsEvent("search", { query, section: "جستجو" });
+    }
     if (query) {
       state.category = "همه";
       state.brands.clear();
@@ -773,7 +872,7 @@ document.querySelectorAll("[data-scroll-products]").forEach(button => button.add
 bannerEl.prev.addEventListener("click", () => showBanner(bannerState.index - 1));
 bannerEl.next.addEventListener("click", () => showBanner(bannerState.index + 1));
 
-buildCategories(); loadProducts(); loadDriveBanners();
+buildCategories(); loadProducts(); loadDriveBanners(); loadFestival(); initUsageAnalytics();
 // شیت فقط وقتی صفحه فعال است تازه‌سازی می‌شود؛ پس از بازگشت کاربر نیز دادهٔ قدیمی فوراً به‌روز می‌شود.
 const PRODUCTS_REFRESH_MS = 5 * 60 * 1000;
 setInterval(() => {

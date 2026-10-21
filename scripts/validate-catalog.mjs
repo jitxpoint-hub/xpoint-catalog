@@ -69,11 +69,21 @@ if (!rows.length) fail("فهرست محصولات خالی است.");
 if (!visibleCount) fail("هیچ محصول قابل نمایشی وجود ندارد.");
 
 const appSource = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const configSource = await readFile(new URL("../config.js", import.meta.url), "utf8");
+const adminHtml = await readFile(new URL("../admin.html", import.meta.url), "utf8");
+const adminJs = await readFile(new URL("../admin.js", import.meta.url), "utf8");
+const adminCss = await readFile(new URL("../admin.css", import.meta.url), "utf8");
+const analyticsScript = await readFile(new URL("../google-apps-script/BannerFeed.gs", import.meta.url), "utf8");
 if (!appSource.includes('document.addEventListener("visibilitychange"')) fail("به‌روزرسانی هوشمند صفحه حذف شده است.");
 if (!appSource.includes("!document.hidden")) fail("کنترل فعال‌بودن صفحه حذف شده است.");
 if (!appSource.includes("RECENT_PRODUCTS_KEY")) fail("تاریخچه محصولات دیده‌شده حذف شده است.");
 if (!appSource.includes("getSimilarProducts")) fail("بخش محصولات مشابه حذف شده است.");
 if (!appSource.includes("برچسب‌های مدیریتی")) fail("خواندن برچسب‌های مدیریتی شیت حذف شده است.");
+if (!appSource.includes("trackAnalyticsEvent")) fail("ثبت رویدادهای استفاده از سایت حذف شده است.");
+if (!appSource.includes("loadFestival")) fail("خواندن جشنواره از شیت حذف شده است.");
+if (!configSource.includes("analyticsEndpoint")) fail("آدرس سرویس گزارش‌گیری تنظیم نشده است.");
+if (!adminHtml.includes("پنل گزارش") || !adminJs.includes("requestStats") || !adminCss.includes("dashboard-grid")) fail("صفحه مستقل گزارش ناقص است.");
+if (!analyticsScript.includes("recordAnalyticsEvent_") || !analyticsScript.includes("analyticsStatsOutput_") || !analyticsScript.includes("festivalOutput_")) fail("بخش گزارش‌گیری و جشنواره Apps Script ناقص است.");
 
 if (!process.exitCode) {
   console.log(`Catalog validation passed: ${rows.length} rows, ${visibleCount} visible products.`);

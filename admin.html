@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101113" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>گزارش استفاده | X.Point</title>
+  <link rel="stylesheet" href="admin.css?v=20261021-1" />
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-shell header-inner">
+      <a class="admin-brand" href="index.html" aria-label="بازگشت به کاتالوگ"><img src="assets/xpoint.svg" alt="X.Point" /></a>
+      <div><span>پنل گزارش</span><strong>رفتار کاربران کاتالوگ</strong></div>
+      <a class="catalog-link" href="index.html">مشاهده سایت</a>
+    </div>
+  </header>
+
+  <main class="admin-shell">
+    <section class="dashboard-intro">
+      <div>
+        <p class="eyebrow">گزارش ساده و بدون اطلاعات شخصی</p>
+        <h1>میزان استفاده از سایت</h1>
+        <p>محصولات، دسته‌ها، بخش‌ها و منابع ورودی پربازدید را یکجا ببینید.</p>
+      </div>
+      <div class="range-tabs" id="rangeTabs" aria-label="بازه گزارش">
+        <button type="button" data-range="today">امروز</button>
+        <button type="button" data-range="7d">۷ روز</button>
+        <button class="active" type="button" data-range="30d">۳۰ روز</button>
+        <button type="button" data-range="all">همه</button>
+      </div>
+    </section>
+
+    <div class="dashboard-status" id="dashboardStatus">در حال دریافت گزارش…</div>
+
+    <section class="summary-grid" aria-label="خلاصه گزارش">
+      <article><span>بازدید صفحه</span><strong id="metricVisits">—</strong><small>بار بازشدن کاتالوگ</small></article>
+      <article><span>نشست‌ها</span><strong id="metricSessions">—</strong><small>استفاده‌های جداگانه</small></article>
+      <article><span>مشاهده محصول</span><strong id="metricProducts">—</strong><small>بازشدن جزئیات کالا</small></article>
+      <article><span>جستجوها</span><strong id="metricSearches">—</strong><small>عبارت‌های جستجوشده</small></article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="report-card report-wide"><header><h2>محصولات پربازدید</h2><span>بازشدن جزئیات</span></header><div class="rank-list" id="topProducts"></div></article>
+      <article class="report-card"><header><h2>بخش‌های پربازدید</h2><span>حضور در صفحه</span></header><div class="rank-list" id="topSections"></div></article>
+      <article class="report-card"><header><h2>دسته‌های محبوب</h2><span>بازدید محصول</span></header><div class="rank-list" id="topCategories"></div></article>
+      <article class="report-card"><header><h2>منبع ورود</h2><span>رفرر و کمپین</span></header><div class="rank-list" id="topSources"></div></article>
+      <article class="report-card"><header><h2>نوع دستگاه</h2><span>بازدید صفحه</span></header><div class="rank-list" id="topDevices"></div></article>
+      <article class="report-card report-wide"><header><h2>عبارت‌های جستجو</h2><span>پرکاربردترین عبارت‌ها</span></header><div class="rank-list" id="topSearches"></div></article>
+    </section>
+  </main>
+
+  <script src="config.js?v=20261021-2"></script>
+  <script src="admin.js?v=20261021-1"></script>
+</body>
+</html>

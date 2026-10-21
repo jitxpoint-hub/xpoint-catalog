@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f26322" />
   <meta name="description" content="کاتالوگ به‌روز محصولات X.Point با فیلتر دسته‌بندی و برند" />
   <title>X.Point | انتخاب درست، ساده‌تر</title>
-  <link rel="stylesheet" href="styles.css?v=20261021-2" />
+  <link rel="stylesheet" href="styles.css?v=20261021-3" />
 </head>
 <body>
   <a class="skip-link" href="#products">رفتن به محصولات</a>
@@ -35,7 +35,16 @@
       </div>
     </section>
 
-    <section class="hero-combined shell" aria-labelledby="hero-title">
+    <section class="festival-strip shell" id="festivalStrip" aria-live="polite" hidden>
+      <div>
+        <span>جشنواره فعال</span>
+        <strong id="festivalTitle"></strong>
+        <p id="festivalDescription"></p>
+      </div>
+      <a id="festivalLink" href="#products">مشاهده جشنواره <span aria-hidden="true">←</span></a>
+    </section>
+
+    <section class="hero-combined shell" id="hero" aria-labelledby="hero-title">
       <div class="hero">
       <div class="hero-copy">
         <p class="eyebrow"><span></span> کاتالوگ هوشمند X.Point</p>
@@ -188,8 +197,8 @@
     </section>
   </div>
 
-  <script src="config.js?v=20260816-1"></script>
+  <script src="config.js?v=20261021-2"></script>
   <script src="category-tree.js?v=20260908-1"></script>
-  <script src="app.js?v=20261021-2"></script>
+  <script src="app.js?v=20261021-4"></script>
 </body>
 </html>
