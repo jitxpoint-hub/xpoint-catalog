@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101113" />
   <meta name="robots" content="noindex,nofollow" />
   <title>گزارش استفاده | X.Point</title>
-  <link rel="stylesheet" href="admin.css?v=20261021-1" />
+  <link rel="stylesheet" href="admin.css?v=20261021-2" />
 </head>
 <body>
   <header class="admin-header">
@@ -35,23 +35,39 @@
     <div class="dashboard-status" id="dashboardStatus">در حال دریافت گزارش…</div>
 
     <section class="summary-grid" aria-label="خلاصه گزارش">
-      <article><span>بازدید صفحه</span><strong id="metricVisits">—</strong><small>بار بازشدن کاتالوگ</small></article>
-      <article><span>نشست‌ها</span><strong id="metricSessions">—</strong><small>استفاده‌های جداگانه</small></article>
-      <article><span>مشاهده محصول</span><strong id="metricProducts">—</strong><small>بازشدن جزئیات کالا</small></article>
-      <article><span>جستجوها</span><strong id="metricSearches">—</strong><small>عبارت‌های جستجوشده</small></article>
+      <article><span>بازدید سایت</span><strong id="metricVisits">—</strong><small>تعداد دفعات بازشدن کاتالوگ</small></article>
+      <article><span>بازدیدهای جداگانه</span><strong id="metricSessions">—</strong><small>تخمین دفعات استفاده مستقل</small></article>
+      <article><span>مشاهده محصول</span><strong id="metricProducts">—</strong><small>تعداد بازشدن جزئیات کالا</small></article>
+      <article class="metric-highlight"><span>نرخ تعامل</span><strong id="metricEngagement">—</strong><small>درصد بازدیدهایی که اقدامی انجام داده‌اند</small></article>
     </section>
+
+    <section class="insight-strip" aria-label="خلاصه مدیریتی">
+      <div><span class="insight-kicker">خلاصه سریع</span><strong id="insightHeadline">در حال تحلیل رفتار کاربران…</strong></div>
+      <p id="insightDetails">پس از دریافت گزارش، پربازدیدترین محصول و گروه اینجا نمایش داده می‌شود.</p>
+    </section>
+
+    <details class="metric-guide">
+      <summary>معنی این عددها چیست؟</summary>
+      <div>
+        <p><strong>بازدید سایت:</strong> هر بار که صفحه اصلی کاتالوگ باز شده است.</p>
+        <p><strong>بازدید جداگانه:</strong> یک نوبت استفاده مستقل از سایت؛ این عدد تخمینی است و اطلاعات شخصی ذخیره نمی‌شود.</p>
+        <p><strong>نرخ تعامل:</strong> درصد بازدیدهای جداگانه‌ای که حداقل یک محصول، دسته، جستجو یا جشنواره را انتخاب کرده‌اند.</p>
+      </div>
+    </details>
 
     <section class="dashboard-grid">
       <article class="report-card report-wide"><header><h2>محصولات پربازدید</h2><span>بازشدن جزئیات</span></header><div class="rank-list" id="topProducts"></div></article>
       <article class="report-card"><header><h2>بخش‌های پربازدید</h2><span>حضور در صفحه</span></header><div class="rank-list" id="topSections"></div></article>
-      <article class="report-card"><header><h2>دسته‌های محبوب</h2><span>بازدید محصول</span></header><div class="rank-list" id="topCategories"></div></article>
-      <article class="report-card"><header><h2>منبع ورود</h2><span>رفرر و کمپین</span></header><div class="rank-list" id="topSources"></div></article>
+      <article class="report-card"><header><h2>گروه‌های اصلی محبوب</h2><span>مثل لوازم خانگی</span></header><div class="rank-list" id="topGroups"></div></article>
+      <article class="report-card"><header><h2>دسته‌بندی‌های محبوب</h2><span>مثل یخچال</span></header><div class="rank-list" id="topCategories"></div></article>
+      <article class="report-card"><header><h2>مسیرهای محبوب محصولات</h2><span>گروه اصلی / دسته‌بندی</span></header><div class="rank-list" id="topCategoryPaths"></div></article>
+      <article class="report-card"><header><h2>نحوه ورود به سایت</h2><span>مستقیم، لینک یا کمپین</span></header><div class="rank-list" id="topSources"></div></article>
       <article class="report-card"><header><h2>نوع دستگاه</h2><span>بازدید صفحه</span></header><div class="rank-list" id="topDevices"></div></article>
-      <article class="report-card report-wide"><header><h2>عبارت‌های جستجو</h2><span>پرکاربردترین عبارت‌ها</span></header><div class="rank-list" id="topSearches"></div></article>
+      <article class="report-card"><header><h2>عبارت‌های جستجو</h2><span><b id="metricSearches">۰</b> جستجو</span></header><div class="rank-list" id="topSearches"></div></article>
     </section>
   </main>
 
   <script src="config.js?v=20261021-2"></script>
-  <script src="admin.js?v=20261021-1"></script>
+  <script src="admin.js?v=20261021-2"></script>
 </body>
 </html>

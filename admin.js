@@ -16,9 +16,9 @@ function requestStats(range) {
   });
 }
 
-function renderRankList(id, items = []) {
+function renderRankList(id, items = [], emptyText = "هنوز داده کافی ثبت نشده است.") {
   const container = document.getElementById(id);
-  if (!items.length) { const empty = document.createElement("p"); empty.className = "rank-empty"; empty.textContent = "هنوز داده‌ای ثبت نشده است."; container.replaceChildren(empty); return; }
+  if (!items.length) { const empty = document.createElement("p"); empty.className = "rank-empty"; empty.textContent = emptyText; container.replaceChildren(empty); return; }
   const max = Math.max(...items.map(item => Number(item.value) || 0), 1);
   container.replaceChildren(...items.slice(0, 10).map(item => {
     const row = document.createElement("div"), label = document.createElement("span"), bar = document.createElement("span"), fill = document.createElement("i"), value = document.createElement("strong");
@@ -33,9 +33,24 @@ function renderDashboard(data) {
   document.getElementById("metricSessions").textContent = faNumberAdmin.format(data.summary.sessions || 0);
   document.getElementById("metricProducts").textContent = faNumberAdmin.format(data.summary.productViews || 0);
   document.getElementById("metricSearches").textContent = faNumberAdmin.format(data.summary.searches || 0);
+  document.getElementById("metricEngagement").textContent = `${faNumberAdmin.format(data.summary.engagementRate || 0)}٪`;
   renderRankList("topProducts", data.products); renderRankList("topSections", data.sections);
-  renderRankList("topCategories", data.categories); renderRankList("topSources", data.sources);
+  renderRankList("topGroups", data.groups, "با انتخاب گروه‌های اصلی، آمار این بخش تکمیل می‌شود.");
+  renderRankList("topCategories", data.categories, "با مشاهده محصولات، دسته‌بندی‌های محبوب اینجا دیده می‌شوند.");
+  renderRankList("topCategoryPaths", data.categoryPaths, "پس از مشاهده محصول، مسیر گروه و دسته اینجا نمایش داده می‌شود.");
+  renderRankList("topSources", data.sources);
   renderRankList("topDevices", data.devices); renderRankList("topSearches", data.searches);
+  const topProduct = data.products?.[0]?.label;
+  const topGroup = data.groups?.[0]?.label;
+  const headline = document.getElementById("insightHeadline");
+  const details = document.getElementById("insightDetails");
+  if (topProduct || topGroup) {
+    headline.textContent = topProduct ? `بیشترین توجه به «${topProduct}» بوده است.` : `«${topGroup}» محبوب‌ترین گروه است.`;
+    details.textContent = [topGroup && `گروه پربازدید: ${topGroup}`, data.sources?.[0]?.label && `ورودی غالب: ${data.sources[0].label}`, data.summary.searches && `${faNumberAdmin.format(data.summary.searches)} جستجو`].filter(Boolean).join("  •  ");
+  } else {
+    headline.textContent = "هنوز برای نتیجه‌گیری داده کافی نداریم.";
+    details.textContent = "با اولین استفاده کاربران، محصولات و دسته‌های محبوب به‌صورت خودکار مشخص می‌شوند.";
+  }
   const updated = new Date(data.generatedAt);
   const status = document.getElementById("dashboardStatus"); status.classList.remove("error");
   status.textContent = `آخرین به‌روزرسانی: ${updated.toLocaleString("fa-IR")}`;

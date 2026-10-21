@@ -110,16 +110,19 @@ function analyticsStatsOutput_(params, callback) {
   const sheet = analyticsSheet_();
   const rows = sheet.getLastRow() > 1 ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 15).getValues() : [];
   const threshold = analyticsThreshold_(range);
-  const summary = { visits: 0, sessions: 0, productViews: 0, searches: 0 };
-  const sessions = {};
-  const products = {}, sections = {}, categories = {}, sources = {}, devices = {}, searches = {};
+  const summary = { visits: 0, sessions: 0, productViews: 0, searches: 0, engagementRate: 0 };
+  const sessions = {}, engagedSessions = {};
+  const products = {}, sections = {}, groups = {}, categories = {}, categoryPaths = {}, sources = {}, devices = {}, searches = {};
 
   rows.forEach(function(row) {
     const time = row[0] instanceof Date ? row[0] : new Date(row[0]);
     if (threshold && (!time || isNaN(time.getTime()) || time < threshold)) return;
     const eventName = String(row[1] || "");
     const session = String(row[2] || "");
+    const group = String(row[5] || "").trim();
+    const category = String(row[6] || "").trim();
     if (session) sessions[session] = true;
+    if (session && ["product_view", "category_select", "search", "festival_click"].indexOf(eventName) >= 0) engagedSessions[session] = true;
     if (eventName === "page_view") {
       summary.visits++;
       increment_(sources, String(row[10] || row[9] || "مستقیم"));
@@ -127,11 +130,15 @@ function analyticsStatsOutput_(params, callback) {
     } else if (eventName === "product_view") {
       summary.productViews++;
       increment_(products, String(row[3] || row[4] || "بدون نام"));
-      increment_(categories, String(row[6] || row[5] || "بدون دسته"));
+      if (group) increment_(groups, group);
+      if (category) increment_(categories, category);
+      if (group && category && group !== category) increment_(categoryPaths, group + " / " + category);
     } else if (eventName === "section_view") {
       increment_(sections, String(row[7] || "سایر"));
     } else if (eventName === "category_select") {
-      increment_(categories, String(row[6] || row[5] || "بدون دسته"));
+      if (group) increment_(groups, group);
+      if (category) increment_(categories, category);
+      if (group && category && group !== category) increment_(categoryPaths, group + " / " + category);
     } else if (eventName === "search") {
       summary.searches++;
       increment_(searches, String(row[8] || "بدون عبارت"));
@@ -141,13 +148,16 @@ function analyticsStatsOutput_(params, callback) {
   });
 
   summary.sessions = Object.keys(sessions).length;
+  summary.engagementRate = summary.sessions ? Math.round(Object.keys(engagedSessions).length / summary.sessions * 100) : 0;
   const result = {
     ok: true,
     range: range,
     summary: summary,
     products: ranked_(products),
     sections: ranked_(sections),
+    groups: ranked_(groups),
     categories: ranked_(categories),
+    categoryPaths: ranked_(categoryPaths),
     sources: ranked_(sources),
     devices: ranked_(devices),
     searches: ranked_(searches),

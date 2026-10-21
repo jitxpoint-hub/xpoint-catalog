@@ -423,7 +423,7 @@ function buildCategories() {
     visual.append(image, shade); content.append(number, title, description, count, action); button.append(visual, content);
     if (hasChildren) button.setAttribute("aria-controls", "subcategoryRail");
     button.addEventListener("click", () => {
-      trackAnalyticsEvent("category_select", { category: category.name, section: "دسته‌بندی‌ها" });
+      trackAnalyticsEvent("category_select", { group: category.name, section: "دسته‌بندی‌ها" });
       selectCategory(category.name);
       scrollCategorySelection();
     });
