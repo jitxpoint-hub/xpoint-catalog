@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f26322" />
   <meta name="description" content="کاتالوگ به‌روز محصولات X.Point با فیلتر دسته‌بندی و برند" />
   <title>X.Point | انتخاب درست، ساده‌تر</title>
-  <link rel="stylesheet" href="styles.css?v=20260906-3" />
+  <link rel="stylesheet" href="styles.css?v=20261021-2" />
 </head>
 <body>
   <a class="skip-link" href="#products">رفتن به محصولات</a>
@@ -116,6 +116,16 @@
         </div>
       </div>
     </section>
+
+    <section class="recently-viewed shell" id="recentlyViewedSection" aria-labelledby="recentlyViewedTitle" hidden>
+      <div class="section-heading recently-viewed-heading">
+        <div>
+          <p class="eyebrow"><span></span> ادامه انتخاب</p>
+          <h2 id="recentlyViewedTitle">محصولات اخیراً دیده‌شده</h2>
+        </div>
+      </div>
+      <div id="recentlyViewedGrid" class="recent-products-grid"></div>
+    </section>
   </main>
 
   <footer>
@@ -131,6 +141,7 @@
     <article class="product-card">
       <div class="product-image-wrap">
         <span class="stock-badge"></span>
+        <div class="product-tags" aria-label="برچسب‌های محصول"></div>
         <img class="product-image" alt="" loading="lazy" />
       </div>
       <div class="product-info">
@@ -157,6 +168,7 @@
         <div class="modal-heading">
           <span class="modal-category" id="modalProductCategory"></span>
           <h2 id="modalProductName"></h2>
+          <div class="modal-tags" id="modalProductTags" aria-label="برچسب‌های محصول"></div>
         </div>
         <section class="modal-description-section" aria-labelledby="modalDescriptionTitle">
           <h3 id="modalDescriptionTitle">توضیحات محصول</h3>
@@ -168,12 +180,16 @@
           <div><dt>وضعیت</dt><dd id="modalProductStock"></dd></div>
         </dl>
         <div class="modal-price"><span>قیمت نقد</span><strong id="modalProductPrice"></strong></div>
+        <section class="modal-related" id="modalRelatedSection" aria-labelledby="modalRelatedTitle" hidden>
+          <h3 id="modalRelatedTitle">محصولات مشابه</h3>
+          <div class="related-products-grid" id="modalRelatedProducts"></div>
+        </section>
       </div>
     </section>
   </div>
 
   <script src="config.js?v=20260816-1"></script>
   <script src="category-tree.js?v=20260908-1"></script>
-  <script src="app.js?v=20261021-1"></script>
+  <script src="app.js?v=20261021-2"></script>
 </body>
 </html>

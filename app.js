@@ -17,6 +17,8 @@ const SUBCATEGORY_ICONS = {
 };
 
 const state = { catalog: [], products: [], category: "همه", brands: new Set(), search: "", sort: "featured" };
+const RECENT_PRODUCTS_KEY = "xpoint-recent-products-v1";
+const RECENT_PRODUCTS_LIMIT = 8;
 let categoryNodes = new Map();
 const bannerState = { items: [], index: 0, rotationTimer: null, refreshTimer: null };
 const el = {
@@ -74,6 +76,10 @@ function splitMediaList(value) {
   return normalize(value).split(/[|\n]+/).map(item => item.trim()).filter(Boolean);
 }
 
+function splitManagementTags(value) {
+  return [...new Set(normalize(value).split(/[|،,\n]+/).map(item => item.trim()).filter(Boolean))].slice(0, 4);
+}
+
 function normalizeMediaUrl(value) {
   const raw = normalize(value);
   if (!raw || !/^https?:\/\//i.test(raw)) return "";
@@ -106,6 +112,7 @@ function normalizeProduct(row, index) {
     images,
     video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "ویدئوی محصول", "ویدیوی محصول", "لینک ویدئو", "لینک ویدیو"])),
     view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "مدل", "مدل سه بعدی", "مدل سه‌بعدی", "لینک مدل", "لینک مدل سه بعدی", "لینک مدل سه‌بعدی", "لینک سه بعدی", "نمای ۳۶۰", "نمای 360"])),
+    tags: splitManagementTags(pick(row, ["tags", "labels", "badges", "برچسب", "برچسب‌ها", "برچسب های مدیریتی", "برچسب‌های مدیریتی"])),
     stock: normalizeStock(pick(row, ["stock", "availability", "وضعیت موجودی", "موجودی", "وضعیت"]), price)
   };
   if (product.category === "یخچال و فریزر") {
@@ -224,7 +231,7 @@ async function loadProducts() {
     state.catalog = raw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
     state.products = state.catalog.filter(p => p.stock !== "عدم نمایش");
     applyMediaEnhancements(state.products);
-    buildCategories(); buildBrandFilters(); render();
+    buildCategories(); buildBrandFilters(); render(); renderRecentlyViewed();
   } catch (error) {
     try {
       const fallbackResponse = await fetch(config.fallbackDataUrl || "products.sample.json", { cache: "no-store" });
@@ -233,7 +240,7 @@ async function loadProducts() {
       state.catalog = fallbackRaw.map(normalizeProduct).filter(p => p.name && p.brand && p.code);
       state.products = state.catalog.filter(p => p.stock !== "عدم نمایش");
       applyMediaEnhancements(state.products);
-      buildCategories(); buildBrandFilters(); render();
+      buildCategories(); buildBrandFilters(); render(); renderRecentlyViewed();
       el.error.hidden = true;
     } catch (fallbackError) {
       el.error.hidden = false;
@@ -524,6 +531,7 @@ function productCard(product) {
   price.innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : `<small>برای دریافت قیمت تماس بگیرید</small>`;
   const stock = fragment.querySelector(".stock-badge"), isOut = /ناموجود|out/i.test(product.stock);
   stock.textContent = isOut ? "ناموجود" : product.stock; stock.classList.toggle("out", isOut);
+  renderTagNodes(fragment.querySelector(".product-tags"), product.tags, 2);
   card.tabIndex = 0; card.setAttribute("role", "button"); card.setAttribute("aria-label", `مشاهده جزئیات ${product.name}`);
   card.addEventListener("click", () => openProductModal(product));
   card.addEventListener("keydown", event => {
@@ -557,15 +565,92 @@ function openProductModal(product) {
   renderModalMedia(product);
   document.querySelector("#modalProductCategory").textContent = product.category || "X.Point";
   document.querySelector("#modalProductName").textContent = product.name;
+  renderTagNodes(document.querySelector("#modalProductTags"), product.tags, 4);
   renderProductDescription(product);
   document.querySelector("#modalProductBrand").textContent = product.brand;
   document.querySelector("#modalProductCode").textContent = product.code;
   document.querySelector("#modalProductStock").textContent = product.stock || "موجود";
   document.querySelector("#modalProductPrice").innerHTML = product.price ? `${faNumber.format(product.price)} <small>${window.XPOINT_CONFIG?.currencyLabel || "تومان"}</small>` : "تماس بگیرید";
-  modalTrigger = document.activeElement;
+  renderRelatedProducts(product);
+  rememberRecentProduct(product.code);
+  renderRecentlyViewed();
+  if (modal.hidden) modalTrigger = document.activeElement;
   lockPageForModal();
   modal.hidden = false;
   document.querySelector("#modalClose").focus({ preventScroll: true });
+}
+
+function renderTagNodes(container, tags = [], limit = 4) {
+  if (!container) return;
+  const nodes = tags.slice(0, limit).map(label => {
+    const tag = document.createElement("span");
+    tag.className = "management-tag";
+    tag.textContent = label;
+    return tag;
+  });
+  container.replaceChildren(...nodes);
+  container.hidden = !nodes.length;
+}
+
+function readRecentProductCodes() {
+  try {
+    const value = JSON.parse(localStorage.getItem(RECENT_PRODUCTS_KEY) || "[]");
+    return Array.isArray(value) ? value.map(normalize).filter(Boolean) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function rememberRecentProduct(code) {
+  const normalizedCode = normalize(code);
+  if (!normalizedCode) return;
+  const codes = [normalizedCode, ...readRecentProductCodes().filter(item => item !== normalizedCode)].slice(0, RECENT_PRODUCTS_LIMIT);
+  try { localStorage.setItem(RECENT_PRODUCTS_KEY, JSON.stringify(codes)); } catch (_) { /* حالت خصوصی مرورگر */ }
+}
+
+function renderRecentlyViewed() {
+  const section = document.querySelector("#recentlyViewedSection"), grid = document.querySelector("#recentlyViewedGrid");
+  if (!section || !grid) return;
+  const byCode = new Map(state.products.map(product => [normalize(product.code), product]));
+  const products = readRecentProductCodes().map(code => byCode.get(code)).filter(Boolean).slice(0, 4);
+  grid.replaceChildren(...products.map(productCard));
+  section.hidden = !products.length;
+}
+
+function getSimilarProducts(product) {
+  const referencePrice = product.price || 0;
+  return state.products
+    .filter(item => item.code !== product.code)
+    .map(item => {
+      let score = 0;
+      if (product.subcategory && item.subcategory === product.subcategory) score += 8;
+      if (product.category && item.category === product.category) score += 4;
+      if (product.group && item.group === product.group) score += 2;
+      if (product.brand && item.brand === product.brand) score += 1;
+      const priceDistance = referencePrice && item.price ? Math.abs(item.price - referencePrice) / referencePrice : Number.POSITIVE_INFINITY;
+      return { item, score, priceDistance };
+    })
+    .filter(candidate => candidate.score > 0)
+    .sort((a, b) => b.score - a.score || a.priceDistance - b.priceDistance || a.item.name.localeCompare(b.item.name, "fa"))
+    .slice(0, 4)
+    .map(candidate => candidate.item);
+}
+
+function renderRelatedProducts(product) {
+  const section = document.querySelector("#modalRelatedSection"), grid = document.querySelector("#modalRelatedProducts");
+  const products = getSimilarProducts(product);
+  grid.replaceChildren(...products.map(item => {
+    const button = document.createElement("button"), image = document.createElement("img"), copy = document.createElement("span"), name = document.createElement("strong"), meta = document.createElement("small");
+    button.type = "button"; button.className = "related-product";
+    image.src = item.image || placeholder(item); image.alt = ""; image.loading = "lazy";
+    image.addEventListener("error", () => { image.src = placeholder(item); }, { once: true });
+    name.textContent = item.name;
+    meta.textContent = item.price ? `${faNumber.format(item.price)} ${window.XPOINT_CONFIG?.currencyLabel || "تومان"}` : item.stock;
+    copy.append(name, meta); button.append(image, copy);
+    button.addEventListener("click", () => { openProductModal(item); document.querySelector(".product-modal")?.scrollTo({ top: 0, behavior: scrollBehavior() }); });
+    return button;
+  }));
+  section.hidden = !products.length;
 }
 
 function renderProductDescription(product) {

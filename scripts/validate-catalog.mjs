@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 const requiredHeaders = [
   "نام محصول", "برند", "کد محصول", "قیمت نقد", "وضعیت موجودی",
   "گروه اصلی", "دسته‌بندی", "زیرمجموعه", "توضیحات", "عکس",
-  "تصاویر بیشتر", "ویدیو", "مدل سه‌بعدی"
+  "تصاویر بیشتر", "ویدیو", "مدل سه‌بعدی", "برچسب‌ها"
 ];
 const allowedStatuses = new Set(["موجود", "ناموجود", "عدم نمایش"]);
 
@@ -71,6 +71,9 @@ if (!visibleCount) fail("هیچ محصول قابل نمایشی وجود ندا
 const appSource = await readFile(new URL("../app.js", import.meta.url), "utf8");
 if (!appSource.includes('document.addEventListener("visibilitychange"')) fail("به‌روزرسانی هوشمند صفحه حذف شده است.");
 if (!appSource.includes("!document.hidden")) fail("کنترل فعال‌بودن صفحه حذف شده است.");
+if (!appSource.includes("RECENT_PRODUCTS_KEY")) fail("تاریخچه محصولات دیده‌شده حذف شده است.");
+if (!appSource.includes("getSimilarProducts")) fail("بخش محصولات مشابه حذف شده است.");
+if (!appSource.includes("برچسب‌های مدیریتی")) fail("خواندن برچسب‌های مدیریتی شیت حذف شده است.");
 
 if (!process.exitCode) {
   console.log(`Catalog validation passed: ${rows.length} rows, ${visibleCount} visible products.`);
