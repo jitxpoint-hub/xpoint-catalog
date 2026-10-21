@@ -30,11 +30,10 @@ function renderRankList(id, items = [], emptyText = "هنوز داده کافی 
 
 function renderDashboard(data) {
   document.getElementById("metricVisits").textContent = faNumberAdmin.format(data.summary.visits || 0);
-  document.getElementById("metricSessions").textContent = faNumberAdmin.format(data.summary.sessions || 0);
   document.getElementById("metricProducts").textContent = faNumberAdmin.format(data.summary.productViews || 0);
   document.getElementById("metricSearches").textContent = faNumberAdmin.format(data.summary.searches || 0);
   document.getElementById("metricEngagement").textContent = `${faNumberAdmin.format(data.summary.engagementRate || 0)}٪`;
-  renderRankList("topProducts", data.products); renderRankList("topSections", data.sections);
+  renderRankList("topProducts", data.products);
   renderRankList("topGroups", data.groups, "با انتخاب گروه‌های اصلی، آمار این بخش تکمیل می‌شود.");
   renderRankList("topCategories", data.categories, "با مشاهده محصولات، دسته‌بندی‌های محبوب اینجا دیده می‌شوند.");
   renderRankList("topCategoryPaths", data.categoryPaths, "پس از مشاهده محصول، مسیر گروه و دسته اینجا نمایش داده می‌شود.");
