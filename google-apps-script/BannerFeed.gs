@@ -130,15 +130,15 @@ function analyticsStatsOutput_(params, callback) {
     } else if (eventName === "product_view") {
       summary.productViews++;
       increment_(products, String(row[3] || row[4] || "بدون نام"));
-      if (group) increment_(groups, group);
+      if (group && group !== "همه") increment_(groups, group);
       if (category) increment_(categories, category);
-      if (group && category && group !== category) increment_(categoryPaths, group + " / " + category);
+      if (group && group !== "همه" && category && group !== category) increment_(categoryPaths, group + " / " + category);
     } else if (eventName === "section_view") {
       increment_(sections, String(row[7] || "سایر"));
     } else if (eventName === "category_select") {
-      if (group) increment_(groups, group);
+      if (group && group !== "همه") increment_(groups, group);
       if (category) increment_(categories, category);
-      if (group && category && group !== category) increment_(categoryPaths, group + " / " + category);
+      if (group && group !== "همه" && category && group !== category) increment_(categoryPaths, group + " / " + category);
     } else if (eventName === "search") {
       summary.searches++;
       increment_(searches, String(row[8] || "بدون عبارت"));

@@ -847,16 +847,20 @@ function chip(label, remove) {
 
 function resetAll() { state.brands.clear(); state.search = ""; state.sort = "featured"; el.search.value = ""; el.sort.value = "featured"; selectCategory("همه"); }
 
-let searchTimer;
+let searchTimer, searchAnalyticsTimer;
 el.search.addEventListener("input", event => {
   clearTimeout(searchTimer);
+  clearTimeout(searchAnalyticsTimer);
   searchTimer = setTimeout(() => {
     const query = normalize(event.target.value);
     state.search = query;
-    if (query.length >= 2 && query !== analyticsState.lastSearch) {
-      analyticsState.lastSearch = query;
-      trackAnalyticsEvent("search", { query, section: "جستجو" });
-    }
+    searchAnalyticsTimer = setTimeout(() => {
+      const finalQuery = normalize(el.search.value);
+      if (finalQuery.length >= 2 && finalQuery === state.search && finalQuery !== analyticsState.lastSearch) {
+        analyticsState.lastSearch = finalQuery;
+        trackAnalyticsEvent("search", { query: finalQuery, section: "جستجو" });
+      }
+    }, 1200);
     if (query) {
       state.category = "همه";
       state.brands.clear();
