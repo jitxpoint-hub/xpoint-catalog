@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 const requiredHeaders = [
   "نام محصول", "برند", "کد محصول", "قیمت نقد", "وضعیت موجودی",
   "گروه اصلی", "دسته‌بندی", "زیرمجموعه", "توضیحات", "عکس",
-  "تصاویر بیشتر", "ویدیو", "مدل سه‌بعدی", "برچسب‌ها"
+  "تصاویر بیشتر", "ویدیو", "برچسب‌ها", "موجودی کل"
 ];
 const allowedStatuses = new Set(["موجود", "ناموجود", "عدم نمایش"]);
 
@@ -81,6 +81,8 @@ if (!appSource.includes("getSimilarProducts")) fail("بخش محصولات مش�
 if (!appSource.includes("برچسب‌های مدیریتی")) fail("خواندن برچسب‌های مدیریتی شیت حذف شده است.");
 if (!appSource.includes("trackAnalyticsEvent")) fail("ثبت رویدادهای استفاده از سایت حذف شده است.");
 if (!appSource.includes("loadFestival")) fail("خواندن جشنواره از شیت حذف شده است.");
+if (/view360|مدل سه.?بعدی|نمای [۳3]۶۰/i.test(appSource)) fail("قابلیت سه‌بعدی باید به‌طور کامل از سایت حذف شود.");
+if (/موجودی کل/.test(appSource)) fail("ستون داخلی «موجودی کل» نباید توسط سایت خوانده شود.");
 if (!configSource.includes("analyticsEndpoint")) fail("آدرس سرویس گزارش‌گیری تنظیم نشده است.");
 if (!adminHtml.includes("پنل گزارش") || !adminJs.includes("requestStats") || !adminCss.includes("dashboard-grid")) fail("صفحه مستقل گزارش ناقص است.");
 if (!analyticsScript.includes("recordAnalyticsEvent_") || !analyticsScript.includes("analyticsStatsOutput_") || !analyticsScript.includes("festivalOutput_")) fail("بخش گزارش‌گیری و جشنواره Apps Script ناقص است.");

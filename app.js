@@ -168,7 +168,6 @@ function normalizeProduct(row, index) {
     image: images[0] || "",
     images,
     video: normalizeMediaUrl(pick(row, ["video", "videourl", "video_url", "ویدئو", "ویدیو", "فیلم", "ویدئوی محصول", "ویدیوی محصول", "لینک ویدئو", "لینک ویدیو"])),
-    view360: normalizeMediaUrl(pick(row, ["360", "3d", "view360", "model3d", "مدل", "مدل سه بعدی", "مدل سه‌بعدی", "لینک مدل", "لینک مدل سه بعدی", "لینک مدل سه‌بعدی", "لینک سه بعدی", "نمای ۳۶۰", "نمای 360"])),
     tags: splitManagementTags(pick(row, ["tags", "labels", "badges", "برچسب", "برچسب‌ها", "برچسب های مدیریتی", "برچسب‌های مدیریتی"])),
     stock: normalizeStock(pick(row, ["stock", "availability", "وضعیت موجودی", "موجودی", "وضعیت"]), price)
   };
@@ -199,8 +198,8 @@ function applyMediaEnhancements(products) {
     products.unshift(product);
   }
   // دارایی محلی فقط برای داده‌های قدیمیِ فاقد هرگونه رسانه استفاده می‌شود.
-  // در حالت عادی عکس، ویدئو و مدل مستقیماً از شیت خوانده می‌شوند.
-  if (product && !product.images?.length && !product.video && !product.view360) {
+  // در حالت عادی عکس و ویدئو مستقیماً از شیت خوانده می‌شوند.
+  if (product && !product.images?.length && !product.video) {
     product.image = "assets/iphone-17-mist-blue-01.webp";
     product.images = [
       "assets/iphone-17-mist-blue-01.webp",
@@ -213,12 +212,11 @@ function applyMediaEnhancements(products) {
       "assets/iphone-17-lavender.webp"
     ];
     product.video = "assets/iphone-17-mist-blue.webm";
-    product.view360 = "assets/demo-product-360.html";
     product.description = "آیفون ۱۷ با حافظه داخلی ۲۵۶ گیگابایت و رنگ Mist Blue، برای استفاده روزمره، عکاسی و اجرای روان برنامه‌ها طراحی شده است. نسخه CH/A این محصول به‌صورت Non Active عرضه می‌شود.\n• حافظه داخلی ۲۵۶ گیگابایت\n• رنگ Mist Blue\n• پارت‌نامبر CH/A\n• وضعیت فعال‌سازی Non Active\n• گالری تصاویر شامل نماهای مختلف و رنگ‌بندی محصول";
   }
 
   const speaker = products.find(item => item.code === "1001619");
-  if (speaker && !speaker.images?.length && !speaker.video && !speaker.view360) {
+  if (speaker && !speaker.images?.length && !speaker.video) {
     const mainPhoto = "https://drive.google.com/file/d/10BIP0fYBZIiQ2Xfj7Xoh3EVkqci7kp_e/view?usp=drive_link";
     const galleryPhotos = [
       "https://drive.google.com/open?id=13BO0iE7WizilDm3kHJ9JeyJpKUbsV4G1&usp=drive_copy",
@@ -228,7 +226,6 @@ function applyMediaEnhancements(products) {
     speaker.image = driveImageUrl(mainPhoto);
     speaker.images = [speaker.image, ...galleryPhotos.map(driveImageUrl).filter(Boolean)];
     speaker.video = normalizeMediaUrl("https://drive.google.com/file/d/1B0jGnzpsf7so8TBpi9w8tXAOgGL9w7A3/view?usp=drive_link");
-    speaker.view360 = normalizeMediaUrl("https://drive.google.com/file/d/1FNYJPnjSpC1j12lCnUUwQKXsGGMH1uzC/view?usp=drive_link");
     if (!speaker.description) speaker.description = "اسپیکر قابل‌حمل JBL PartyBox 520 برای مهمانی و دورهمی طراحی شده است و بدنه مقاوم، چرخ و دسته تلسکوپی، پنل کنترل کامل و نورپردازی هماهنگ با موسیقی دارد.\n• توان صوتی مناسب فضاهای بزرگ\n• اتصال بی‌سیم و ورودی میکروفون\n• چرخ و دسته برای جابه‌جایی آسان\n• پنل کنترل صدا، باس، تریبل و اکو\n• نورپردازی چندرنگ در پنل جلویی";
   }
 }
@@ -815,7 +812,6 @@ function renderModalMedia(product) {
     }
   };
   if (product.video) addTab("ویدئو", "▶", () => showFrame(product.video, `ویدئوی ${product.name}`, true));
-  if (product.view360) addTab("نمای ۳۶۰°", "↻", () => showFrame(product.view360, `نمای ۳۶۰ درجه ${product.name}`));
   activate(imageTab, () => showImage(0));
 }
 
